@@ -119,7 +119,7 @@ export default function SignInPage() {
                     Password
                   </label>
                   <Link
-                    href="#"
+                    href="/auth/reset-password"
                     className="text-[#1a5ca1] text-lg hover:underline font-semibold"
                   >
                     Forgot Password ?
@@ -146,7 +146,7 @@ export default function SignInPage() {
                     id="password"
                     name="password"
                     className="bg-white border border-[#d9d9d9] text-[#010922] text-lg rounded-lg focus:ring-[#1a5ca1] focus:border-[#1a5ca1] block w-full pl-12 p-4"
-                    placeholder={showPassword ? "password" : "*********"}
+                    placeholder={showPassword ? "password" : "********"}
                     required
                   />
                   <div className="absolute inset-y-0 right-0 pr-3 flex items-center">

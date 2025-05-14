@@ -4,7 +4,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
 import { supabase } from "@/utils/supabase/client";
-import { Eye, EyeOff, LoaderCircle } from "lucide-react";
+import { LoaderCircle } from "lucide-react";
 import { toast } from "sonner";
 
 export default function UpdatePasswordPage() {
@@ -14,7 +14,7 @@ export default function UpdatePasswordPage() {
   const [success, setSuccess] = useState(false);
   const [view1, setView1] = useState(false);
   const [view2, setView2] = useState(false);
-  // const [email, setEmail] = useState("");
+  const [, setEmail] = useState("");
   const router = useRouter();
 
   const verifyOtp = async (e: React.FormEvent<HTMLFormElement>) => {
@@ -37,7 +37,7 @@ export default function UpdatePasswordPage() {
         setError(error.message);
         toast("OTP verification failed");
       } else {
-        // setEmail(email);
+        setEmail(email);
         setIsOtpVerified(true);
         toast("OTP verified successfully");
       }
@@ -210,7 +210,6 @@ export default function UpdatePasswordPage() {
                     className="absolute top-2.5 right-3 text-gray-500 cursor-pointer"
                     onClick={() => setView1(!view1)}
                   >
-                    {view1 ? <EyeOff size={18} /> : <Eye size={18} />}
                   </div>
                 </div>
               </div>
@@ -231,10 +230,9 @@ export default function UpdatePasswordPage() {
                     className="w-full px-4 py-2 border rounded-md pr-10"
                   />
                   <div
-                    className="absolute top-2.5 right-3 text-gray-500 cursor-pointer"
+                    className="absolute top-2.5 right-1 text-gray-500 cursor-pointer"
                     onClick={() => setView2(!view2)}
                   >
-                    {view2 ? <EyeOff size={18} /> : <Eye size={18} />}
                   </div>
                 </div>
               </div>

@@ -9,18 +9,21 @@ import { resetPassword } from "./action";
 
 export default function SignInPage() {
   const [load, setLoad] = useState(false);
-  // const [message, setMessage] = useState<{
-  //   success?: string;
-  //   error?: string;
-  // } | null>(null);
+  const [, setMessage] = useState<{
+    success?: string;
+    error?: string;
+  } | null>(null);
 
   async function handleSubmit(formData: FormData) {
     setLoad(true);
     toast('We will send you an email with instructions to reset your password');
 
+    setTimeout(() => {
+      window.open('https://mail.google.com/mail/u/0/#inbox', '_blank');
+    } , 1500);
+
     const result = await resetPassword(formData);
-    console.log(result);
-    // setMessage(result);
+    setMessage(result);
     setLoad(false);
   }
 
