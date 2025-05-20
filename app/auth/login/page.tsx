@@ -14,7 +14,6 @@ export default function SignInPage() {
   const togglePasswordVisibility = () => {
     setShowPassword((prev) => !prev);
   };
-
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setIsLoading(true);
@@ -22,12 +21,21 @@ export default function SignInPage() {
     const formData = new FormData(e.currentTarget);
 
     try {
+      // Clear any existing cookies to help with the 431 error
+      document.cookie.split(";").forEach(function(c) {
+        document.cookie = c.replace(/^ +/, "").replace(/=.*/, "=;expires=" + new Date().toUTCString() + ";path=/");
+      });
+      
       const result = await login(formData);
       if (result?.success) {
         window.location.href = "/dashboard";
       }
     } catch (error) {
-      toast("Invalid Email or Password");
+      if (error instanceof Error && error.message.includes("431")) {
+        toast.error("Login failed: Header too large. Please clear your browser cookies and try again.");
+      } else {
+        toast.error("Invalid Email or Password");
+      }
       console.error("Login failed:", error);
     } finally {
       setIsLoading(false);

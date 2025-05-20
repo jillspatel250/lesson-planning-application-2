@@ -1,9 +1,7 @@
-import React from 'react'
+"use client";
 
-function Dashboard() {
-  return (
-    <div>Dashboard</div>
-  )
+import HODDashboard from "@/components/HODDashboard";
+
+export default function Dashboard() {
+  return <HODDashboard />;
 }
-
-export default Dashboard
