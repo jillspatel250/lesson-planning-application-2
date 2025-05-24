@@ -107,4 +107,30 @@ interface Faculty_Subjects {
   };
 }
 
-export type { Users, Institues, Departments, User_Role, Subjects, Faculty_Subjects };
+interface Student_data {
+  student_id_number: string;
+  gender: string;
+  date_of_birth: string;
+  ph_number: string;
+  dept_id: string;
+  sem: number;
+  batch_councellor: string;
+  father_number: string;
+  father_email: string;
+  mother_number: string;
+  first_name: string;
+  last_name: string;
+  email: string;
+  division: string;
+  batch: string;
+}
+
+export type {
+  Users,
+  Institues,
+  Departments,
+  User_Role,
+  Subjects,
+  Faculty_Subjects,
+  Student_data,
+};
