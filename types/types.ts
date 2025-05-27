@@ -125,6 +125,18 @@ interface Student_data {
   batch: string;
 }
 
+interface Timetable {
+  date: string;
+  type: string;
+  subject: string;
+  faculty: string;
+  department: string;
+  to: string;
+  from: string;
+  division: string;
+  batch: string;
+}
+
 export type {
   Users,
   Institues,
@@ -133,4 +145,5 @@ export type {
   Subjects,
   Faculty_Subjects,
   Student_data,
+  Timetable,
 };
