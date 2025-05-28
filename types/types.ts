@@ -23,28 +23,6 @@ interface Departments {
   };
 }
 
-interface User_Role {
-  id: string;
-  users: {
-    id: string;
-    auth_id: string;
-    email: string;
-    name: string;
-    profile_photo: string | null;
-  };
-  role_name: string;
-  departments: {
-    id: string;
-    name: string;
-    abbreviation_depart: string;
-    institues: {
-      id: string;
-      name: string;
-      abbreviation_insti: string;
-    };
-  };
-}
-
 interface Subjects {
   id: string;
   code: string;
@@ -66,6 +44,34 @@ interface Subjects {
   };
   is_practical: boolean;
   is_theory: boolean;
+  academic_year?: string; // Optional because it's not always present
+  division?: string;      // Optional because it's not always present
+}
+
+interface User_Role {
+  depart_id: string | undefined;
+  id: string;
+  users: {
+    id: string;
+    auth_id: string;
+    email: string;
+    name: string;
+    profile_photo: string | null;
+  };
+  role_name: string;
+  departments: {
+    id: string;
+    name: string;
+    abbreviation_depart: string;
+    institues: {
+      id: string;
+      name: string;
+      abbreviation_insti: string;
+    };
+  };
+  subjects: Subjects;
+  academic_year: string | null;
+  division: string | null;
 }
 
 interface Faculty_Subjects {
@@ -81,30 +87,7 @@ interface Faculty_Subjects {
       abbreviation_insti: string;
     };
   };
-  subjects: {
-    id: string;
-    code: string;
-    name: string;
-    semester: number;
-    lecture_hours: number;
-    lab_hours: number;
-    abbreviation_name: string;
-    credites: number;
-    departments: {
-      id: string;
-      name: string;
-      abbreviation_depart: string;
-      institues: {
-        id: string;
-        name: string;
-        abbreviation_insti: string;
-      };
-    };
-    is_practical: boolean;
-    is_theory: boolean;
-    academic_year: string;
-    divison: string;
-  };
+  subjects: Subjects;
 }
 
 interface Student_data {

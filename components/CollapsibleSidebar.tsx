@@ -28,7 +28,7 @@ export default function CollapsibleSidebar({ signOut }: { signOut: () => void })
       >
         {/* Sidebar Header */}
         <div className="p-4 border-b">
-          <div className="flex items-center justify-around space-x-2">
+          <div className="flex items-center space-x-2">
             <Avatar className="h-10 w-10">
               {userData.profile_photo ? (
                 <Image
