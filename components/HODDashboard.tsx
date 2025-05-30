@@ -1,57 +1,27 @@
-"use client";
+"use client"
 
-import { DialogTrigger } from "@/components/ui/dialog";
-import { useState, useEffect, useMemo } from "react";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import {
-  Table,
-  TableHead,
-  TableBody,
-  TableCell,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
-import { useDashboardContext } from "@/context/DashboardContext";
-import { BookOpen, Edit, Plus, Trash, Users } from "lucide-react";
-import { fetchFaculty } from "@/app/dashboard/actions/fetchFaculty";
-import { fetchSubjects } from "@/app/dashboard/actions/fetchSubjects";
-import { Button } from "./ui/button";
-import type { User_Role, Subjects } from "@/types/types";
-import { HODDashboardSkeleton } from "./HODDashboardSkeleton";
-import {
-  addFaculty,
-  editFaculty,
-  deleteFaculty,
-} from "@/app/dashboard/actions/addFaculty";
-import { addSubject, deleteSubject } from "@/app/dashboard/actions/addSubject";
-import { fetchUsers } from "@/app/dashboard/actions/fetchUser";
-import { useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
-import * as z from "zod";
-import {
-  Dialog,
-  DialogContent,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
-import {
-  Form,
-  FormControl,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-} from "@/components/ui/form";
-import { Input } from "@/components/ui/input";
-import { Checkbox } from "@/components/ui/checkbox";
-import { toast } from "sonner";
+import { DialogTrigger } from "@/components/ui/dialog"
+import { useState, useEffect, useMemo } from "react"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import { Table, TableHead, TableBody, TableCell, TableHeader, TableRow } from "@/components/ui/table"
+import { useDashboardContext } from "@/context/DashboardContext"
+import { BookOpen, Edit, Plus, Trash, Users } from "lucide-react"
+import { fetchFaculty } from "@/app/dashboard/actions/fetchFaculty"
+import { fetchSubjects } from "@/app/dashboard/actions/fetchSubjects"
+import { Button } from "./ui/button"
+import type { User_Role, Subjects } from "@/types/types"
+import { HODDashboardSkeleton } from "./HODDashboardSkeleton"
+import { addFaculty, editFaculty, deleteFaculty } from "@/app/dashboard/actions/addFaculty"
+import { addSubject, deleteSubject } from "@/app/dashboard/actions/addSubject"
+import { fetchUsers } from "@/app/dashboard/actions/fetchUser"
+import { useForm } from "react-hook-form"
+import { zodResolver } from "@hookform/resolvers/zod"
+import * as z from "zod"
+import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog"
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form"
+import { Input } from "@/components/ui/input"
+import { Checkbox } from "@/components/ui/checkbox"
+import { toast } from "sonner"
 import {
   AlertDialog,
   AlertDialogAction,
@@ -61,37 +31,23 @@ import {
   AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogTitle,
-} from "@/components/ui/alert-dialog";
-
-type RoleDataItem = {
-  id: string;
-  role_name: string;
-  user_id: string;
-  depart_id: string;
-  departments: {
-    id: string;
-    name: string;
-    abbreviation_depart: string;
-    institutes: {
-      id: string;
-      name: string;
-      abbreviation_insti: string;
-    };
-  };
-};
+} from "@/components/ui/alert-dialog"
+import {type RoleDataItem} from "@/context/DashboardContext"
 
 type User = {
-  auth_id: string;
-  name: string;
-  email: string;
-};
+  id: string
+  auth_id: string
+  name: string
+  email: string
+  profile_photo?: string
+}
 
 type PSOPEOItem = {
-  id: string;
-  label: string;
-  value: string;
-  type: "PSO" | "PEO";
-};
+  id: string
+  label: string
+  value: string
+  type: "PSO" | "PEO"
+}
 
 // Form schemas
 const addFacultySchema = z.object({
@@ -102,7 +58,7 @@ const addFacultySchema = z.object({
   division: z.enum(["Division 1", "Division 2", "Division 1 & Division 2"], {
     required_error: "Please select a division",
   }),
-});
+})
 
 const editFacultySchema = z.object({
   id: z.string().uuid(),
@@ -113,7 +69,7 @@ const editFacultySchema = z.object({
   division: z.enum(["Division 1", "Division 2", "Division 1 & Division 2"], {
     required_error: "Please select a division",
   }),
-});
+})
 
 const addSubjectSchema = z.object({
   code: z.string().min(3, "Code must be at least 3 characters"),
@@ -121,66 +77,62 @@ const addSubjectSchema = z.object({
   semester: z.coerce.number().int().min(1).max(8),
   lectureHours: z.coerce.number().int().min(0),
   labHours: z.coerce.number().int().min(0),
-  abbreviationName: z
-    .string()
-    .min(2, "Abbreviation must be at least 2 characters"),
+  abbreviationName: z.string().min(2, "Abbreviation must be at least 2 characters"),
   credits: z.coerce.number().int().min(1),
   departmentId: z.string(),
   isPractical: z.boolean(),
   isTheory: z.boolean(),
-});
+})
 
 export default function HODDashboard() {
-  const { roleData, currentRole, setCurrentRole } = useDashboardContext();
-  const [role, setRole] = useState<RoleDataItem>();
-  const [faculty, setFaculty] = useState<User_Role[]>([]);
-  const [subjects, setSubjects] = useState<Subjects[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
-  const [facultyDialogOpen, setFacultyDialogOpen] = useState(false);
-  const [editFacultyDialogOpen, setEditFacultyDialogOpen] = useState(false);
-  const [subjectDialogOpen, setSubjectDialogOpen] = useState(false);
-  const [users, setUsers] = useState<User[]>([]);
-  const [isAddingFaculty, setIsAddingFaculty] = useState(false);
-  const [isEditingFaculty, setIsEditingFaculty] = useState(false);
-  const [isAddingSubject, setIsAddingSubject] = useState(false);
-  const [selectedFaculty, setSelectedFaculty] = useState<User_Role | null>(
-    null
-  );
-  const [deleteFacultyDialogOpen, setDeleteFacultyDialogOpen] = useState(false);
-  const [deleteSubjectDialogOpen, setDeleteSubjectDialogOpen] = useState(false);
-  const [selectedSubject, setSelectedSubject] = useState<Subjects | null>(null);
-  const [isDeletingFaculty, setIsDeletingFaculty] = useState(false);
-  const [isDeletingSubject, setIsDeletingSubject] = useState(false);
-  const [showPsoPeoInDialog, setShowPsoPeoInDialog] = useState(false);
-  const [psoPeoDialogOpen, setPsoPeoDialogOpen] = useState(false);
+  const { roleData, currentRole, setCurrentRole } = useDashboardContext()
+  const [role, setRole] = useState<RoleDataItem>()
+  const [faculty, setFaculty] = useState<User_Role[]>([])
+  const [subjects, setSubjects] = useState<Subjects[]>([])
+  const [isLoading, setIsLoading] = useState(true)
+  const [facultyDialogOpen, setFacultyDialogOpen] = useState(false)
+  const [editFacultyDialogOpen, setEditFacultyDialogOpen] = useState(false)
+  const [subjectDialogOpen, setSubjectDialogOpen] = useState(false)
+  const [users, setUsers] = useState<User[]>([])
+  const [isAddingFaculty, setIsAddingFaculty] = useState(false)
+  const [isEditingFaculty, setIsEditingFaculty] = useState(false)
+  const [isAddingSubject, setIsAddingSubject] = useState(false)
+  const [selectedFaculty, setSelectedFaculty] = useState<User_Role | null>(null)
+  const [deleteFacultyDialogOpen, setDeleteFacultyDialogOpen] = useState(false)
+  const [deleteSubjectDialogOpen, setDeleteSubjectDialogOpen] = useState(false)
+  const [selectedSubject, setSelectedSubject] = useState<Subjects | null>(null)
+  const [isDeletingFaculty, setIsDeletingFaculty] = useState(false)
+  const [isDeletingSubject, setIsDeletingSubject] = useState(false)
+  const [showPsoPeoInDialog, setShowPsoPeoInDialog] = useState(false)
+  const [psoPeoDialogOpen, setPsoPeoDialogOpen] = useState(false)
   const [psoItems, setPsoItems] = useState<PSOPEOItem[]>([
     { id: "1", label: "PSO1", value: "", type: "PSO" },
     { id: "2", label: "PSO2", value: "", type: "PSO" },
-  ]);
+  ])
   const [peoItems, setPeoItems] = useState<PSOPEOItem[]>([
     { id: "1", label: "PEO1", value: "", type: "PEO" },
     { id: "2", label: "PEO2", value: "", type: "PEO" },
-  ]);
-  const [middleString, setMiddleString] = useState("");
+  ])
+  const [middleString, setMiddleString] = useState("")
 
   const facultyForm = useForm<z.infer<typeof addFacultySchema>>({
     resolver: zodResolver(addFacultySchema),
     defaultValues: {
-      departId: currentRole?.depart_id,
+      departId: currentRole?.depart_id || "",
       academicYear: new Date().getFullYear().toString(),
       division: "Division 1 & Division 2",
     },
-  });
+  })
 
   const editFacultyForm = useForm<z.infer<typeof editFacultySchema>>({
     resolver: zodResolver(editFacultySchema),
     defaultValues: {
       id: "",
-      departId: currentRole?.depart_id,
+      departId: currentRole?.depart_id || "",
       academicYear: new Date().getFullYear().toString(),
       division: "Division 1 & Division 2",
     },
-  });
+  })
 
   const subjectForm = useForm<z.infer<typeof addSubjectSchema>>({
     resolver: zodResolver(addSubjectSchema),
@@ -193,387 +145,386 @@ export default function HODDashboard() {
       isPractical: false,
       isTheory: true,
     },
-  });
+  })
 
   const uniqueRoles = useMemo(() => {
-    const unique = new Map<string, RoleDataItem>();
+    const unique = new Map<string, RoleDataItem>()
     roleData.forEach((role) => {
       if (!unique.has(role.role_name)) {
-        unique.set(role.role_name, role);
+        unique.set(role.role_name, role)
       }
-    });
-    return Array.from(unique.values());
-  }, [roleData]);
+    })
+    return Array.from(unique.values())
+  }, [roleData])
 
   const uniqueFaculty = useMemo(() => {
-    const facultyMap = new Map<
-      string,
-      User_Role & { subjectAbbreviations: string[] }
-    >();
+    const facultyMap = new Map<string, User_Role & { subjectAbbreviations: string[] }>()
 
     faculty.forEach((facultyMember) => {
-      const email = facultyMember.users.email;
-      if (!facultyMap.has(email)) {
+      const email = facultyMember.users?.email
+      if (email && !facultyMap.has(email)) {
         facultyMap.set(email, {
           ...facultyMember,
           subjectAbbreviations: [] as string[],
-        });
+        })
       }
-      const current = facultyMap.get(email);
+      const current = facultyMap.get(email || "")
       if (current && facultyMember.subjects?.abbreviation_name) {
-        current.subjectAbbreviations.push(
-          facultyMember.subjects.abbreviation_name
-        );
+        current.subjectAbbreviations.push(facultyMember.subjects.abbreviation_name)
       }
-    });
+    })
 
-    return Array.from(facultyMap.values());
-  }, [faculty]);
+    return Array.from(facultyMap.values())
+  }, [faculty])
 
   const handleRoleChange = (roleName: string) => {
-    const selectedRole = roleData.find((role) => role.role_name === roleName);
+    const selectedRole = roleData.find((role) => role.role_name === roleName)
     if (selectedRole) {
-      setCurrentRole(selectedRole);
+      setCurrentRole(selectedRole)
     }
-  };
+  }
 
   // PSO/PEO Management Functions
   const addPsoItem = () => {
-    const newId = (psoItems.length + 1).toString();
-    const newLabel = `PSO${psoItems.length + 1}`;
-    setPsoItems([
-      ...psoItems,
-      { id: newId, label: newLabel, value: "", type: "PSO" },
-    ]);
-  };
+    const newId = (psoItems.length + 1).toString()
+    const newLabel = `PSO${psoItems.length + 1}`
+    setPsoItems([...psoItems, { id: newId, label: newLabel, value: "", type: "PSO" }])
+  }
 
   const addPeoItem = () => {
-    const newId = (peoItems.length + 1).toString();
-    const newLabel = `PEO${peoItems.length + 1}`;
-    setPeoItems([
-      ...peoItems,
-      { id: newId, label: newLabel, value: "", type: "PEO" },
-    ]);
-  };
+    const newId = (peoItems.length + 1).toString()
+    const newLabel = `PEO${peoItems.length + 1}`
+    setPeoItems([...peoItems, { id: newId, label: newLabel, value: "", type: "PEO" }])
+  }
 
-  const updatePsoItem = (
-    id: string,
-    field: "label" | "value",
-    newValue: string
-  ) => {
-    setPsoItems(
-      psoItems.map((item) =>
-        item.id === id ? { ...item, [field]: newValue } : item
-      )
-    );
-  };
+  const updatePsoItem = (id: string, field: "label" | "value", newValue: string) => {
+    setPsoItems(psoItems.map((item) => (item.id === id ? { ...item, [field]: newValue } : item)))
+  }
 
-  const updatePeoItem = (
-    id: string,
-    field: "label" | "value",
-    newValue: string
-  ) => {
-    setPeoItems(
-      peoItems.map((item) =>
-        item.id === id ? { ...item, [field]: newValue } : item
-      )
-    );
-  };
+  const updatePeoItem = (id: string, field: "label" | "value", newValue: string) => {
+    setPeoItems(peoItems.map((item) => (item.id === id ? { ...item, [field]: newValue } : item)))
+  }
 
   const deletePsoItem = (id: string) => {
     if (psoItems.length > 1) {
-      setPsoItems(psoItems.filter((item) => item.id !== id));
+      setPsoItems(psoItems.filter((item) => item.id !== id))
     }
-  };
+  }
 
   const deletePeoItem = (id: string) => {
     if (peoItems.length > 1) {
-      setPeoItems(peoItems.filter((item) => item.id !== id));
+      setPeoItems(peoItems.filter((item) => item.id !== id))
     }
-  };
+  }
 
   const handlePsoPeoSubmit = () => {
-    console.log("PSO Items:", psoItems);
-    console.log("PEO Items:", peoItems);
-    console.log("Middle String:", middleString);
+    console.log("PSO Items:", psoItems)
+    console.log("PEO Items:", peoItems)
+    console.log("Middle String:", middleString)
 
-    toast("PSO/PEO data saved successfully");
-    setPsoPeoDialogOpen(false);
-    setShowPsoPeoInDialog(false);
-    setSubjectDialogOpen(false);
+    toast("PSO/PEO data saved successfully")
+    setPsoPeoDialogOpen(false)
+    setShowPsoPeoInDialog(false)
+    setSubjectDialogOpen(false)
 
     // Reset the form data
     setPsoItems([
       { id: "1", label: "PSO1", value: "", type: "PSO" },
       { id: "2", label: "PSO2", value: "", type: "PSO" },
-    ]);
+    ])
     setPeoItems([
       { id: "1", label: "PEO1", value: "", type: "PEO" },
       { id: "2", label: "PEO2", value: "", type: "PEO" },
-    ]);
-    setMiddleString("");
-  };
+    ])
+    setMiddleString("")
+  }
 
   useEffect(() => {
     const fetchUsersData = async () => {
       try {
-        const userData = await fetchUsers();
-        setUsers(userData);
+        const result = await fetchUsers()
+        console.log("Fetched users result:", result)
+        // Fix: Extract userData from the result object
+        if (result && result.userData) {
+          setUsers(result.userData)
+        } else {
+          setUsers([])
+        }
       } catch (error) {
-        console.error("Error fetching users:", error);
+        console.error("Error fetching users:", error)
+        setUsers([])
       }
-    };
+    }
 
     if (facultyDialogOpen || editFacultyDialogOpen) {
-      fetchUsersData();
+      fetchUsersData()
     }
-  }, [facultyDialogOpen, editFacultyDialogOpen]);
+  }, [facultyDialogOpen, editFacultyDialogOpen])
 
-  const onAddFacultySubmit = async (
-    values: z.infer<typeof addFacultySchema>
-  ) => {
-    setIsAddingFaculty(true);
-    values.departId = currentRole.depart_id;
+  const onAddFacultySubmit = async (values: z.infer<typeof addFacultySchema>) => {
+    if (!currentRole?.depart_id) {
+      toast("Department ID is missing")
+      return
+    }
 
-    const formData = new FormData();
+    setIsAddingFaculty(true)
+    values.departId = currentRole.depart_id
+
+    const formData = new FormData()
     Object.entries(values).forEach(([key, value]) => {
       if (value !== undefined) {
-        formData.append(key, value.toString());
+        formData.append(key, value.toString())
       }
-    });
+    })
 
     try {
-      const result = await addFaculty(formData);
+      const result = await addFaculty(formData)
       if (result.success) {
-        toast("Faculty added successfully");
-        setFacultyDialogOpen(false);
-        facultyForm.reset();
+        toast("Faculty added successfully")
+        setFacultyDialogOpen(false)
+        facultyForm.reset({
+          departId: currentRole.depart_id,
+          academicYear: new Date().getFullYear().toString(),
+          division: "Division 1 & Division 2",
+        })
 
-        const facultyData = await fetchFaculty();
+        const facultyData = await fetchFaculty()
         const departFaculty = facultyData.filter(
-          (faculty) =>
-            faculty.depart_id === currentRole.depart_id &&
-            faculty.role_name === "Faculty"
-        );
-        setFaculty(departFaculty);
+          (faculty) => faculty.depart_id === currentRole.depart_id && faculty.role_name === "Faculty",
+        )
+        setFaculty(departFaculty)
       } else {
-        toast("Failed to add faculty");
+        toast("Failed to add faculty")
       }
     } catch (error) {
-      console.error("Error adding faculty:", error);
-      toast("An unexpected error occurred");
+      console.error("Error adding faculty:", error)
+      toast("An unexpected error occurred")
     } finally {
-      setIsAddingFaculty(false);
+      setIsAddingFaculty(false)
     }
-  };
+  }
 
-  const onEditFacultySubmit = async (
-    values: z.infer<typeof editFacultySchema>
-  ) => {
-    setIsEditingFaculty(true);
-    values.departId = currentRole.depart_id;
+  const onEditFacultySubmit = async (values: z.infer<typeof editFacultySchema>) => {
+    if (!currentRole?.depart_id) {
+      toast("Department ID is missing")
+      return
+    }
 
-    const formData = new FormData();
+    setIsEditingFaculty(true)
+    values.departId = currentRole.depart_id
+
+    const formData = new FormData()
     Object.entries(values).forEach(([key, value]) => {
       if (value !== undefined) {
-        formData.append(key, value.toString());
+        formData.append(key, value.toString())
       }
-    });
+    })
 
     try {
-      const result = await editFaculty(formData);
+      const result = await editFaculty(formData)
       if (result.success) {
-        toast("Faculty updated successfully");
-        setEditFacultyDialogOpen(false);
-        editFacultyForm.reset();
+        toast("Faculty updated successfully")
+        setEditFacultyDialogOpen(false)
+        editFacultyForm.reset()
 
-        const facultyData = await fetchFaculty();
+        const facultyData = await fetchFaculty()
         const departFaculty = facultyData.filter(
-          (faculty) =>
-            faculty.depart_id === currentRole.depart_id &&
-            faculty.role_name === "Faculty"
-        );
-        setFaculty(departFaculty);
+          (faculty) => faculty.depart_id === currentRole.depart_id && faculty.role_name === "Faculty",
+        )
+        setFaculty(departFaculty)
       } else {
-        toast("Failed to update faculty");
+        toast("Failed to update faculty")
       }
     } catch (error) {
-      console.error("Error updating faculty:", error);
-      toast("An unexpected error occurred");
+      console.error("Error updating faculty:", error)
+      toast("An unexpected error occurred")
     } finally {
-      setIsEditingFaculty(false);
+      setIsEditingFaculty(false)
     }
-  };
+  }
 
   const handleEditFaculty = (faculty: User_Role) => {
-    console.log("Editing faculty:", faculty);
-    setSelectedFaculty(faculty);
+    console.log("Editing faculty:", faculty)
+    setSelectedFaculty(faculty)
     editFacultyForm.reset({
       id: faculty.id,
-      userId: faculty.users.auth_id,
+      userId: faculty.users?.auth_id || "",
       departId: faculty.depart_id,
-      subjectId: faculty.subjects.id,
-      academicYear:
-        faculty.academic_year || new Date().getFullYear().toString(),
+      subjectId: faculty.subjects?.id || "",
+      academicYear: faculty.academic_year || new Date().getFullYear().toString(),
       division:
-        (faculty.division as
-          | "Division 1"
-          | "Division 2"
-          | "Division 1 & Division 2") || "Division 1 & Division 2",
-    });
-    setEditFacultyDialogOpen(true);
-  };
+        (faculty.division as "Division 1" | "Division 2" | "Division 1 & Division 2") || "Division 1 & Division 2",
+    })
+    setEditFacultyDialogOpen(true)
+  }
 
   const handleDeleteFaculty = (faculty: User_Role) => {
-    setSelectedFaculty(faculty);
-    setDeleteFacultyDialogOpen(true);
-  };
+    setSelectedFaculty(faculty)
+    setDeleteFacultyDialogOpen(true)
+  }
 
   const confirmDeleteFaculty = async () => {
     if (!selectedFaculty) {
-      return;
+      return
     }
 
-    setIsDeletingFaculty(true);
+    setIsDeletingFaculty(true)
     try {
-      const result = await deleteFaculty(selectedFaculty.id);
+      const result = await deleteFaculty(selectedFaculty.id)
       if (result.success) {
-        toast("Faculty deleted successfully");
-        setDeleteFacultyDialogOpen(false);
+        toast("Faculty deleted successfully")
+        setDeleteFacultyDialogOpen(false)
 
-        const facultyData = await fetchFaculty();
+        const facultyData = await fetchFaculty()
         const departFaculty = facultyData.filter(
-          (faculty) =>
-            faculty.depart_id === currentRole.depart_id &&
-            faculty.role_name === "Faculty"
-        );
-        setFaculty(departFaculty);
+          (faculty) => faculty.depart_id === currentRole.depart_id && faculty.role_name === "Faculty",
+        )
+        setFaculty(departFaculty)
       } else {
-        toast("Failed to delete faculty");
+        toast("Failed to delete faculty")
       }
     } catch (error) {
-      console.error("Error deleting faculty:", error);
-      toast("An unexpected error occurred");
+      console.error("Error deleting faculty:", error)
+      toast("An unexpected error occurred")
     } finally {
-      setIsDeletingFaculty(false);
+      setIsDeletingFaculty(false)
     }
-  };
+  }
 
   const handleDeleteSubject = (subject: Subjects) => {
-    setSelectedSubject(subject);
-    setDeleteSubjectDialogOpen(true);
-  };
+    setSelectedSubject(subject)
+    setDeleteSubjectDialogOpen(true)
+  }
 
   const confirmDeleteSubject = async () => {
-    if (!selectedSubject) return;
+    if (!selectedSubject) return
 
-    setIsDeletingSubject(true);
+    setIsDeletingSubject(true)
     try {
-      const result = await deleteSubject(selectedSubject.id);
+      const result = await deleteSubject(selectedSubject.id)
       if (result.success) {
-        toast("Subject deleted successfully");
-        setDeleteSubjectDialogOpen(false);
+        toast("Subject deleted successfully")
+        setDeleteSubjectDialogOpen(false)
 
         // Refresh both subjects and faculty data since faculty assignments may have changed
-        const [subjectData, facultyData] = await Promise.all([
-          fetchSubjects(),
-          fetchFaculty(),
-        ]);
+        const [subjectData, facultyData] = await Promise.all([fetchSubjects(), fetchFaculty()])
 
-        const departSubjects = subjectData.filter(
-          (subject) => subject.department_id === currentRole.depart_id
-        );
-        setSubjects(departSubjects);
+        const departSubjects = subjectData.filter((subject) => subject.department_id === currentRole.depart_id)
+        setSubjects(departSubjects)
 
         const departFaculty = facultyData.filter(
-          (faculty) =>
-            faculty.depart_id === currentRole.depart_id &&
-            faculty.role_name === "Faculty"
-        );
-        setFaculty(departFaculty);
+          (faculty) => faculty.depart_id === currentRole.depart_id && faculty.role_name === "Faculty",
+        )
+        setFaculty(departFaculty)
       } else {
-        toast("Failed to delete subject");
+        toast("Failed to delete subject")
       }
     } catch (error) {
-      console.error("Error deleting subject:", error);
-      toast("An unexpected error occurred");
+      console.error("Error deleting subject:", error)
+      toast("An unexpected error occurred")
     } finally {
-      setIsDeletingSubject(false);
+      setIsDeletingSubject(false)
     }
-  };
+  }
 
-  const onAddSubjectSubmit = async (
-    values: z.infer<typeof addSubjectSchema>
-  ) => {
-    setIsAddingSubject(true);
-    values.departmentId = currentRole.depart_id;
+  const onAddSubjectSubmit = async (values: z.infer<typeof addSubjectSchema>) => {
+    if (!currentRole?.depart_id) {
+      toast("Department ID is missing")
+      return
+    }
 
-    const formData = new FormData();
+    setIsAddingSubject(true)
+    values.departmentId = currentRole.depart_id
+
+    const formData = new FormData()
     Object.entries(values).forEach(([key, value]) => {
-      formData.append(key, value.toString());
-    });
+      formData.append(key, value.toString())
+    })
 
     try {
-      const result = await addSubject(formData);
+      const result = await addSubject(formData)
       if (result.success) {
-        toast("Subject added successfully");
-        subjectForm.reset();
+        toast("Subject added successfully")
+        subjectForm.reset({
+          departmentId: currentRole.depart_id,
+          semester: 1,
+          lectureHours: 0,
+          labHours: 0,
+          credits: 0,
+          isPractical: false,
+          isTheory: true,
+        })
 
-        const subjectData = await fetchSubjects();
-        const departSubjects = subjectData.filter(
-          (subject) => subject.department_id === currentRole.depart_id
-        );
-        setSubjects(departSubjects);
+        const subjectData = await fetchSubjects()
+        const departSubjects = subjectData.filter((subject) => subject.department_id === currentRole.depart_id)
+        setSubjects(departSubjects)
 
         // Show PSO/PEO button in dialog after successful subject addition
-        setShowPsoPeoInDialog(true);
+        setShowPsoPeoInDialog(true)
       } else {
-        toast("Failed to add subject");
+        toast("Failed to add subject")
       }
     } catch (error) {
-      console.error("Error adding subject:", error);
-      toast("An unexpected error occurred");
+      console.error("Error adding subject:", error)
+      toast("An unexpected error occurred")
     } finally {
-      setIsAddingSubject(false);
+      setIsAddingSubject(false)
     }
-  };
+  }
 
   useEffect(() => {
-    const foundRole = roleData.find(
-      (x) => x.role_name === currentRole.role_name
-    );
-    setRole(foundRole);
-  }, [roleData, currentRole]);
+    const foundRole = roleData.find((x) => x.role_name === currentRole?.role_name)
+    setRole(foundRole)
+  }, [roleData, currentRole])
 
   useEffect(() => {
     const loadData = async () => {
-      setIsLoading(true);
-      try {
-        const facultyData = await fetchFaculty();
-        const departFaculty = facultyData.filter(
-          (faculty) =>
-            faculty.depart_id === currentRole.depart_id &&
-            faculty.role_name == "Faculty"
-        );
-        setFaculty(departFaculty);
-
-        const subjectData = await fetchSubjects();
-        const departSubjects = subjectData.filter(
-          (subject) => subject.department_id === currentRole.depart_id
-        );
-        setSubjects(departSubjects);
-      } catch (error) {
-        console.error("Error fetching data:", error);
-      } finally {
-        setIsLoading(false);
+      if (!currentRole?.depart_id) {
+        setIsLoading(false)
+        return
       }
-    };
 
-    loadData();
-  }, [currentRole.depart_id]);
+      setIsLoading(true)
+      try {
+        const facultyData = await fetchFaculty()
+        const departFaculty = facultyData.filter(
+          (faculty) => faculty.depart_id === currentRole.depart_id && faculty.role_name === "Faculty",
+        )
+        setFaculty(departFaculty)
+
+        const subjectData = await fetchSubjects()
+        const departSubjects = subjectData.filter((subject) => subject.department_id === currentRole.depart_id)
+        setSubjects(departSubjects)
+      } catch (error) {
+        console.error("Error fetching data:", error)
+      } finally {
+        setIsLoading(false)
+      }
+    }
+
+    loadData()
+  }, [currentRole?.depart_id])
+
+  // Update form defaults when currentRole changes
+  useEffect(() => {
+    if (currentRole?.depart_id) {
+      facultyForm.setValue("departId", currentRole.depart_id)
+      editFacultyForm.setValue("departId", currentRole.depart_id)
+      subjectForm.setValue("departmentId", currentRole.depart_id)
+    }
+  }, [currentRole?.depart_id, facultyForm, editFacultyForm, subjectForm])
 
   if (isLoading) {
-    return <HODDashboardSkeleton />;
+    return <HODDashboardSkeleton />
+  }
+
+  if (!currentRole) {
+    return (
+      <div className="flex items-center justify-center h-64">
+        <p className="text-lg text-gray-500">No role selected</p>
+      </div>
+    )
+  } else {
   }
 
   return (
@@ -583,10 +534,7 @@ export default function HODDashboard() {
           {currentRole.role_name} Dashboard
         </p>
         <div>
-          <Select
-            onValueChange={handleRoleChange}
-            value={currentRole.role_name}
-          >
+          <Select onValueChange={handleRoleChange} value={currentRole.role_name}>
             <SelectTrigger className="w-[180px]">
               <SelectValue placeholder={currentRole.role_name} />
             </SelectTrigger>
@@ -606,10 +554,10 @@ export default function HODDashboard() {
           <div>
             <div className="flex flex-col justify-around pl-5 py-2 bg-[#EBF5FF] h-[77px] rounded-[10px] border border-gray-400 mt-3">
               <p className="text-[#1A5CA1] font-manrope font-bold text-[20px] leading-[100%] tracking-[0em]">
-                {currentRole.departments.institutes.name}
+                {currentRole.departments?.institutes?.name || "Institute Name"}
               </p>
               <h2 className="font-manrope font-medium text-[18px] leading-[100%] tracking-[0em]">
-                {currentRole.departments.name}
+                {currentRole.departments?.name || "Department Name"}
               </h2>
             </div>
 
@@ -644,10 +592,7 @@ export default function HODDashboard() {
                   <h2 className="font-manrope font-semibold text-[18px] leading-[100%] tracking-[0]">
                     Faculty Management
                   </h2>
-                  <Dialog
-                    open={facultyDialogOpen}
-                    onOpenChange={setFacultyDialogOpen}
-                  >
+                  <Dialog open={facultyDialogOpen} onOpenChange={setFacultyDialogOpen}>
                     <DialogTrigger asChild>
                       <Button>
                         <div className="flex items-center gap-2">
@@ -663,12 +608,7 @@ export default function HODDashboard() {
                         </DialogTitle>
                       </DialogHeader>
                       <Form {...facultyForm}>
-                        <form
-                          onSubmit={facultyForm.handleSubmit(
-                            onAddFacultySubmit
-                          )}
-                          className="space-y-4"
-                        >
+                        <form onSubmit={facultyForm.handleSubmit(onAddFacultySubmit)} className="space-y-4">
                           <div className="flex gap-x-4">
                             <FormField
                               control={facultyForm.control}
@@ -676,10 +616,7 @@ export default function HODDashboard() {
                               render={({ field }) => (
                                 <FormItem>
                                   <FormLabel>Faculty</FormLabel>
-                                  <Select
-                                    onValueChange={field.onChange}
-                                    defaultValue={field.value}
-                                  >
+                                  <Select onValueChange={field.onChange} value={field.value}>
                                     <FormControl>
                                       <SelectTrigger className="w-[200px]">
                                         <SelectValue placeholder="Select Faculty" />
@@ -687,11 +624,7 @@ export default function HODDashboard() {
                                     </FormControl>
                                     <SelectContent>
                                       {users.map((user) => (
-                                        <SelectItem
-                                          className="cursor-pointer"
-                                          key={user.auth_id}
-                                          value={user.auth_id}
-                                        >
+                                        <SelectItem className="cursor-pointer" key={user.auth_id} value={user.auth_id}>
                                           {user.name}
                                         </SelectItem>
                                       ))}
@@ -708,10 +641,7 @@ export default function HODDashboard() {
                               render={({ field }) => (
                                 <FormItem>
                                   <FormLabel>Subject</FormLabel>
-                                  <Select
-                                    onValueChange={field.onChange}
-                                    defaultValue={field.value}
-                                  >
+                                  <Select onValueChange={field.onChange} value={field.value}>
                                     <FormControl>
                                       <SelectTrigger className="w-[230px]">
                                         <SelectValue placeholder="Select Subject" />
@@ -719,13 +649,8 @@ export default function HODDashboard() {
                                     </FormControl>
                                     <SelectContent>
                                       {subjects.map((subject) => (
-                                        <SelectItem
-                                          className="cursor-pointer"
-                                          key={subject.id}
-                                          value={subject.id}
-                                        >
-                                          {subject.name} (
-                                          {subject.abbreviation_name})
+                                        <SelectItem className="cursor-pointer" key={subject.id} value={subject.id}>
+                                          {subject.name} ({subject.abbreviation_name})
                                         </SelectItem>
                                       ))}
                                     </SelectContent>
@@ -756,32 +681,20 @@ export default function HODDashboard() {
                             render={({ field }) => (
                               <FormItem>
                                 <FormLabel>Division</FormLabel>
-                                <Select
-                                  onValueChange={field.onChange}
-                                  defaultValue={field.value}
-                                >
+                                <Select onValueChange={field.onChange} value={field.value}>
                                   <FormControl>
                                     <SelectTrigger className="w-[230px]">
                                       <SelectValue placeholder="Select division" />
                                     </SelectTrigger>
                                   </FormControl>
                                   <SelectContent>
-                                    <SelectItem
-                                      className="cursor-pointer"
-                                      value="Division 1"
-                                    >
+                                    <SelectItem className="cursor-pointer" value="Division 1">
                                       Division 1
                                     </SelectItem>
-                                    <SelectItem
-                                      className="cursor-pointer"
-                                      value="Division 2"
-                                    >
+                                    <SelectItem className="cursor-pointer" value="Division 2">
                                       Division 2
                                     </SelectItem>
-                                    <SelectItem
-                                      className="cursor-pointer"
-                                      value="Division 1 & Division 2"
-                                    >
+                                    <SelectItem className="cursor-pointer" value="Division 1 & Division 2">
                                       Division 1 & Division 2
                                     </SelectItem>
                                   </SelectContent>
@@ -793,11 +706,7 @@ export default function HODDashboard() {
 
                           <DialogFooter>
                             <div className="flex justify-between w-full">
-                              <Button
-                                type="button"
-                                variant="outline"
-                                onClick={() => setFacultyDialogOpen(false)}
-                              >
+                              <Button type="button" variant="outline" onClick={() => setFacultyDialogOpen(false)}>
                                 Cancel
                               </Button>
                               <Button type="submit" disabled={isAddingFaculty}>
@@ -825,28 +734,20 @@ export default function HODDashboard() {
                       {uniqueFaculty.length > 0 ? (
                         uniqueFaculty.map((facultyMember) => (
                           <TableRow key={facultyMember.id}>
-                            <TableCell className="font-medium">
-                              {facultyMember.users.name}
-                            </TableCell>
-                            <TableCell>{facultyMember.users.email}</TableCell>
-                            <TableCell>
-                              {facultyMember.subjectAbbreviations.join(", ")}
-                            </TableCell>
+                            <TableCell className="font-medium">{facultyMember.users?.name || "N/A"}</TableCell>
+                            <TableCell>{facultyMember.users?.email || "N/A"}</TableCell>
+                            <TableCell>{facultyMember.subjectAbbreviations.join(", ") || "No subjects"}</TableCell>
                             <TableCell>
                               <div className="flex items-center gap-2">
                                 <Button
                                   className="bg-green-600 hover:bg-green-700"
-                                  onClick={() =>
-                                    handleEditFaculty(facultyMember)
-                                  }
+                                  onClick={() => handleEditFaculty(facultyMember)}
                                 >
                                   <Edit />
                                 </Button>
                                 <Button
                                   className="bg-red-600 hover:bg-red-700"
-                                  onClick={() =>
-                                    handleDeleteFaculty(facultyMember)
-                                  }
+                                  onClick={() => handleDeleteFaculty(facultyMember)}
                                 >
                                   <Trash />
                                 </Button>
@@ -872,10 +773,7 @@ export default function HODDashboard() {
                     Subject Details
                   </h2>
                   <div className="flex gap-2">
-                    <Dialog
-                      open={subjectDialogOpen}
-                      onOpenChange={setSubjectDialogOpen}
-                    >
+                    <Dialog open={subjectDialogOpen} onOpenChange={setSubjectDialogOpen}>
                       <DialogTrigger asChild>
                         <Button>
                           <div className="flex items-center gap-2">
@@ -891,12 +789,7 @@ export default function HODDashboard() {
                           </DialogTitle>
                         </DialogHeader>
                         <Form {...subjectForm}>
-                          <form
-                            onSubmit={subjectForm.handleSubmit(
-                              onAddSubjectSubmit
-                            )}
-                            className="space-y-4"
-                          >
+                          <form onSubmit={subjectForm.handleSubmit(onAddSubjectSubmit)} className="space-y-4">
                             <FormField
                               control={subjectForm.control}
                               name="code"
@@ -918,10 +811,7 @@ export default function HODDashboard() {
                                 <FormItem>
                                   <FormLabel>Subject Name</FormLabel>
                                   <FormControl>
-                                    <Input
-                                      {...field}
-                                      placeholder="Data Communication and Networking"
-                                    />
+                                    <Input {...field} placeholder="Data Communication and Networking" />
                                   </FormControl>
                                   <FormMessage />
                                 </FormItem>
@@ -950,12 +840,7 @@ export default function HODDashboard() {
                                   <FormItem>
                                     <FormLabel>Semester</FormLabel>
                                     <FormControl>
-                                      <Input
-                                        type="number"
-                                        {...field}
-                                        min={1}
-                                        max={8}
-                                      />
+                                      <Input type="number" {...field} min={1} max={8} />
                                     </FormControl>
                                     <FormMessage />
                                   </FormItem>
@@ -1021,9 +906,7 @@ export default function HODDashboard() {
                                       />
                                     </FormControl>
                                     <div className="space-y-1 leading-none cursor-pointer">
-                                      <FormLabel className="cursor-pointer">
-                                        Theory Subject
-                                      </FormLabel>
+                                      <FormLabel className="cursor-pointer">Theory Subject</FormLabel>
                                     </div>
                                   </FormItem>
                                 )}
@@ -1042,9 +925,7 @@ export default function HODDashboard() {
                                       />
                                     </FormControl>
                                     <div className="space-y-1 leading-none cursor-pointer">
-                                      <FormLabel className="cursor-pointer">
-                                        Practical Subject
-                                      </FormLabel>
+                                      <FormLabel className="cursor-pointer">Practical Subject</FormLabel>
                                     </div>
                                   </FormItem>
                                 )}
@@ -1057,26 +938,18 @@ export default function HODDashboard() {
                                   type="button"
                                   variant="outline"
                                   onClick={() => {
-                                    setSubjectDialogOpen(false);
-                                    setShowPsoPeoInDialog(false);
+                                    setSubjectDialogOpen(false)
+                                    setShowPsoPeoInDialog(false)
                                   }}
                                 >
                                   Cancel
                                 </Button>
                                 {!showPsoPeoInDialog ? (
-                                  <Button
-                                    type="submit"
-                                    disabled={isAddingSubject}
-                                  >
-                                    {isAddingSubject
-                                      ? "Adding..."
-                                      : "Add Subject"}
+                                  <Button type="submit" disabled={isAddingSubject}>
+                                    {isAddingSubject ? "Adding..." : "Add Subject"}
                                   </Button>
                                 ) : (
-                                  <Button
-                                    type="button"
-                                    onClick={() => setPsoPeoDialogOpen(true)}
-                                  >
+                                  <Button type="button" onClick={() => setPsoPeoDialogOpen(true)}>
                                     Add PSO/PEO
                                   </Button>
                                 )}
@@ -1088,10 +961,7 @@ export default function HODDashboard() {
                     </Dialog>
 
                     {/* PSO/PEO Dialog */}
-                    <Dialog
-                      open={psoPeoDialogOpen}
-                      onOpenChange={setPsoPeoDialogOpen}
-                    >
+                    <Dialog open={psoPeoDialogOpen} onOpenChange={setPsoPeoDialogOpen}>
                       <DialogContent className="sm:max-w-[600px] max-h-[80vh] overflow-y-auto">
                         <DialogHeader>
                           <DialogTitle className="text-[#1A5CA1] font-manrope font-bold text-[22px] leading-[25px] mb-3">
@@ -1103,9 +973,7 @@ export default function HODDashboard() {
                           {/* PSO Section */}
                           <div className="space-y-4">
                             <div className="flex items-center justify-between">
-                              <h3 className="text-lg font-semibold">
-                                Program Specific Outcome
-                              </h3>
+                              <h3 className="text-lg font-semibold">Program Specific Outcome</h3>
                               <Button
                                 type="button"
                                 variant="outline"
@@ -1118,31 +986,16 @@ export default function HODDashboard() {
                             </div>
 
                             {psoItems.map((item) => (
-                              <div
-                                key={item.id}
-                                className="flex items-center gap-2"
-                              >
+                              <div key={item.id} className="flex items-center gap-2">
                                 <Input
                                   value={item.label}
-                                  onChange={(e) =>
-                                    updatePsoItem(
-                                      item.id,
-                                      "label",
-                                      e.target.value
-                                    )
-                                  }
+                                  onChange={(e) => updatePsoItem(item.id, "label", e.target.value)}
                                   className="w-20"
                                   placeholder="PSO1"
                                 />
                                 <Input
                                   value={item.value}
-                                  onChange={(e) =>
-                                    updatePsoItem(
-                                      item.id,
-                                      "value",
-                                      e.target.value
-                                    )
-                                  }
+                                  onChange={(e) => updatePsoItem(item.id, "value", e.target.value)}
                                   className="flex-1"
                                   placeholder="Enter PSO description"
                                 />
@@ -1163,9 +1016,7 @@ export default function HODDashboard() {
                           {/* PEO Section */}
                           <div className="space-y-4">
                             <div className="flex items-center justify-between">
-                              <h3 className="text-lg font-semibold">
-                                Program Educational Objective
-                              </h3>
+                              <h3 className="text-lg font-semibold">Program Educational Objective</h3>
                               <Button
                                 type="button"
                                 variant="outline"
@@ -1178,31 +1029,16 @@ export default function HODDashboard() {
                             </div>
 
                             {peoItems.map((item) => (
-                              <div
-                                key={item.id}
-                                className="flex items-center gap-2"
-                              >
+                              <div key={item.id} className="flex items-center gap-2">
                                 <Input
                                   value={item.label}
-                                  onChange={(e) =>
-                                    updatePeoItem(
-                                      item.id,
-                                      "label",
-                                      e.target.value
-                                    )
-                                  }
+                                  onChange={(e) => updatePeoItem(item.id, "label", e.target.value)}
                                   className="w-20"
                                   placeholder="PEO1"
                                 />
                                 <Input
                                   value={item.value}
-                                  onChange={(e) =>
-                                    updatePeoItem(
-                                      item.id,
-                                      "value",
-                                      e.target.value
-                                    )
-                                  }
+                                  onChange={(e) => updatePeoItem(item.id, "value", e.target.value)}
                                   className="flex-1"
                                   placeholder="Enter PEO description"
                                 />
@@ -1223,11 +1059,7 @@ export default function HODDashboard() {
 
                         <DialogFooter className="mt-6">
                           <div className="flex justify-between w-full">
-                            <Button
-                              type="button"
-                              variant="outline"
-                              onClick={() => setPsoPeoDialogOpen(false)}
-                            >
+                            <Button type="button" variant="outline" onClick={() => setPsoPeoDialogOpen(false)}>
                               Back to Subject
                             </Button>
                             <Button type="button" onClick={handlePsoPeoSubmit}>
@@ -1255,9 +1087,7 @@ export default function HODDashboard() {
                       {subjects.length > 0 ? (
                         subjects.map((subject) => (
                           <TableRow key={subject.id}>
-                            <TableCell className="font-medium">
-                              {subject.name}
-                            </TableCell>
+                            <TableCell className="font-medium">{subject.name}</TableCell>
                             <TableCell>{subject.code}</TableCell>
                             <TableCell>{subject.semester}</TableCell>
                             <TableCell>{subject.abbreviation_name}</TableCell>
@@ -1290,10 +1120,7 @@ export default function HODDashboard() {
       </div>
 
       {/* Edit Faculty Dialog */}
-      <Dialog
-        open={editFacultyDialogOpen}
-        onOpenChange={setEditFacultyDialogOpen}
-      >
+      <Dialog open={editFacultyDialogOpen} onOpenChange={setEditFacultyDialogOpen}>
         <DialogContent className="sm:max-w-[500px]">
           <DialogHeader>
             <DialogTitle className="text-[#1A5CA1] font-manrope font-bold text-[22px] leading-[25px] mb-3">
@@ -1301,10 +1128,7 @@ export default function HODDashboard() {
             </DialogTitle>
           </DialogHeader>
           <Form {...editFacultyForm}>
-            <form
-              onSubmit={editFacultyForm.handleSubmit(onEditFacultySubmit)}
-              className="space-y-4"
-            >
+            <form onSubmit={editFacultyForm.handleSubmit(onEditFacultySubmit)} className="space-y-4">
               <FormField
                 control={editFacultyForm.control}
                 name="id"
@@ -1324,10 +1148,7 @@ export default function HODDashboard() {
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel>Faculty</FormLabel>
-                      <Select
-                        onValueChange={field.onChange}
-                        value={field.value}
-                      >
+                      <Select onValueChange={field.onChange} value={field.value}>
                         <FormControl>
                           <SelectTrigger className="w-[200px]">
                             <SelectValue placeholder="Select Faculty" />
@@ -1335,11 +1156,7 @@ export default function HODDashboard() {
                         </FormControl>
                         <SelectContent>
                           {users.map((user) => (
-                            <SelectItem
-                              className="cursor-pointer"
-                              key={user.auth_id}
-                              value={user.auth_id}
-                            >
+                            <SelectItem className="cursor-pointer" key={user.auth_id} value={user.auth_id}>
                               {user.name}
                             </SelectItem>
                           ))}
@@ -1356,10 +1173,7 @@ export default function HODDashboard() {
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel>Subject</FormLabel>
-                      <Select
-                        onValueChange={field.onChange}
-                        value={field.value}
-                      >
+                      <Select onValueChange={field.onChange} value={field.value}>
                         <FormControl>
                           <SelectTrigger className="w-[230px]">
                             <SelectValue placeholder="Select Subject" />
@@ -1367,11 +1181,7 @@ export default function HODDashboard() {
                         </FormControl>
                         <SelectContent>
                           {subjects.map((subject) => (
-                            <SelectItem
-                              className="cursor-pointer"
-                              key={subject.id}
-                              value={subject.id}
-                            >
+                            <SelectItem className="cursor-pointer" key={subject.id} value={subject.id}>
                               {subject.name} ({subject.abbreviation_name})
                             </SelectItem>
                           ))}
@@ -1410,22 +1220,13 @@ export default function HODDashboard() {
                         </SelectTrigger>
                       </FormControl>
                       <SelectContent>
-                        <SelectItem
-                          className="cursor-pointer"
-                          value="Division 1"
-                        >
+                        <SelectItem className="cursor-pointer" value="Division 1">
                           Division 1
                         </SelectItem>
-                        <SelectItem
-                          className="cursor-pointer"
-                          value="Division 2"
-                        >
+                        <SelectItem className="cursor-pointer" value="Division 2">
                           Division 2
                         </SelectItem>
-                        <SelectItem
-                          className="cursor-pointer"
-                          value="Division 1 & Division 2"
-                        >
+                        <SelectItem className="cursor-pointer" value="Division 1 & Division 2">
                           Division 1 & Division 2
                         </SelectItem>
                       </SelectContent>
@@ -1437,11 +1238,7 @@ export default function HODDashboard() {
 
               <DialogFooter>
                 <div className="flex justify-between w-full">
-                  <Button
-                    type="button"
-                    variant="outline"
-                    onClick={() => setEditFacultyDialogOpen(false)}
-                  >
+                  <Button type="button" variant="outline" onClick={() => setEditFacultyDialogOpen(false)}>
                     Cancel
                   </Button>
                   <Button type="submit" disabled={isEditingFaculty}>
@@ -1455,19 +1252,14 @@ export default function HODDashboard() {
       </Dialog>
 
       {/* Delete Faculty Confirmation Dialog */}
-      <AlertDialog
-        open={deleteFacultyDialogOpen}
-        onOpenChange={setDeleteFacultyDialogOpen}
-      >
+      <AlertDialog open={deleteFacultyDialogOpen} onOpenChange={setDeleteFacultyDialogOpen}>
         <AlertDialogContent>
           <AlertDialogHeader>
             <AlertDialogTitle className="text-red-600 font-manrope font-bold text-[23px] leading-[25px]">
               Delete Faculty
             </AlertDialogTitle>
             <AlertDialogDescription className="text-black">
-              Are you sure you want to delete{" "}
-              <b>{selectedFaculty?.users?.name}</b>? This action cannot be
-              undone.
+              Are you sure you want to delete <b>{selectedFaculty?.users?.name}</b>? This action cannot be undone.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
@@ -1486,22 +1278,17 @@ export default function HODDashboard() {
       </AlertDialog>
 
       {/* Delete Subject Confirmation Dialog */}
-      <AlertDialog
-        open={deleteSubjectDialogOpen}
-        onOpenChange={setDeleteSubjectDialogOpen}
-      >
+      <AlertDialog open={deleteSubjectDialogOpen} onOpenChange={setDeleteSubjectDialogOpen}>
         <AlertDialogContent>
           <AlertDialogHeader>
             <AlertDialogTitle className="text-red-600 font-manrope font-bold text-[23px] leading-[25px]">
               Delete Subject
             </AlertDialogTitle>
             <AlertDialogDescription className="text-black">
-              Are you sure you want to delete <b>{selectedSubject?.name}</b>?
-              This action cannot be undone.
+              Are you sure you want to delete <b>{selectedSubject?.name}</b>? This action cannot be undone.
               <br />
               <br />
-              <strong>Note:</strong> Any faculty assigned to this subject will
-              have their assignment removed.
+              <strong>Note:</strong> Any faculty assigned to this subject will have their assignment removed.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
@@ -1519,5 +1306,5 @@ export default function HODDashboard() {
         </AlertDialogContent>
       </AlertDialog>
     </div>
-  );
+  )
 }

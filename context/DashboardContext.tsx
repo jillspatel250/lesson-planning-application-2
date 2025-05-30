@@ -2,7 +2,7 @@
 
 import { createContext, useContext, ReactNode, useState } from "react";
 
-type UserData = {
+export type UserData = {
   id: string;
   auth_id: string;
   email: string;
@@ -10,7 +10,7 @@ type UserData = {
   name: string;
 };
 
-type RoleDataItem = {
+export type RoleDataItem = {
   id: string;
   role_name: string;
   user_id: string;
@@ -23,9 +23,8 @@ type RoleDataItem = {
       id: string;
       name: string;
       abbreviation_insti: string;
-
-    }
-  }
+    };
+  };
 };
 
 interface DashboardContextType {

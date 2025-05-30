@@ -44,8 +44,8 @@ interface Subjects {
   };
   is_practical: boolean;
   is_theory: boolean;
-  academic_year?: string; // Optional because it's not always present
-  division?: string;      // Optional because it's not always present
+  academic_year?: string; 
+  division?: string;      
 }
 
 interface User_Role {

@@ -1,7 +1,5 @@
-"use client";
-
 import HODDashboard from "@/components/HODDashboard";
 
-export default function Dashboard() {
+export default function DashboardPage() {
   return <HODDashboard />;
 }
