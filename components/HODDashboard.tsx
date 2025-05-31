@@ -53,7 +53,7 @@ type PSOPEOItem = {
 const addFacultySchema = z.object({
   userId: z.string().uuid("Please select a valid faculty"),
   departId: z.string(),
-  subjectId: z.string().optional(),
+  subjectId: z.string(),
   academicYear: z.string().min(4, "Please enter a valid academic year"),
   division: z.enum(["Division 1", "Division 2", "Division 1 & Division 2"], {
     required_error: "Please select a division",
