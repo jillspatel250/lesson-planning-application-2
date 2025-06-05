@@ -14,7 +14,7 @@ export async function resetPassword(formData: FormData) {
     .single()
 
   if (userError || !userData) {
-    return { error: 'Please Enter Correct Email Used Before !!' }
+    return { error: "Can't find given email in database !!" }
   }
 
   const { error } = await supabase.auth.resetPasswordForEmail(email, {

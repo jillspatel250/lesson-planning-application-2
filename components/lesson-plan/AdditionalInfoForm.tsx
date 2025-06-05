@@ -1,24 +1,33 @@
-"use client"
+"use client";
 
-import type React from "react"
-import { useState } from "react"
-import { useForm, useFieldArray } from "react-hook-form"
-import { zodResolver } from "@hookform/resolvers/zod"
-import { Textarea } from "@/components/ui/textarea"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
-import { Button } from "@/components/ui/button"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Plus, Trash2, Save } from "lucide-react"
-import { toast } from "sonner"
-import { additionalInfoSchema, type AdditionalInfoFormValues } from "@/utils/schema"
-import { saveAdditionalInfoForm } from "@/app/dashboard/actions/saveAdditionalInfoForm"
-import { useDashboardContext } from "@/context/DashboardContext"
+import type React from "react";
+import { useState } from "react";
+import { useForm, useFieldArray } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { Textarea } from "@/components/ui/textarea";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Button } from "@/components/ui/button";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Plus, Trash2, Save } from "lucide-react";
+import { toast } from "sonner";
+import {
+  additionalInfoSchema,
+  type AdditionalInfoFormValues,
+} from "@/utils/schema";
+import { saveAdditionalInfoForm } from "@/app/dashboard/actions/saveAdditionalInfoForm";
+import { useDashboardContext } from "@/context/DashboardContext";
 
 interface AdditionalInfoFormProps {
-  lessonPlan: any
-  setLessonPlan: React.Dispatch<React.SetStateAction<any>>
+  lessonPlan: any;
+  setLessonPlan: React.Dispatch<React.SetStateAction<any>>;
 }
 
 const eventTypes = [
@@ -35,7 +44,7 @@ const eventTypes = [
   "Debate",
   "Idea/Innovation Contest",
   "Other",
-]
+];
 
 const targetAudienceOptions = [
   "1st Semester",
@@ -47,7 +56,7 @@ const targetAudienceOptions = [
   "7th Semester",
   "8th Semester",
   "Staff",
-]
+];
 
 const skillMappingOptions = [
   "Problem Solving",
@@ -60,11 +69,14 @@ const skillMappingOptions = [
   "Innovation",
   "Analytical Thinking",
   "Project Management",
-]
+];
 
-export default function AdditionalInfoForm({ lessonPlan, setLessonPlan }: AdditionalInfoFormProps) {
-  const { userData } = useDashboardContext()
-  const [isSaving, setIsSaving] = useState(false)
+export default function AdditionalInfoForm({
+  lessonPlan,
+  setLessonPlan,
+}: AdditionalInfoFormProps) {
+  const { userData } = useDashboardContext();
+  const [isSaving, setIsSaving] = useState(false);
 
   const {
     register,
@@ -80,17 +92,23 @@ export default function AdditionalInfoForm({ lessonPlan, setLessonPlan }: Additi
       subject_id: lessonPlan?.subject?.id || "",
       classroom_conduct: lessonPlan?.additional_info?.classroom_conduct || "",
       attendance_policy: lessonPlan?.additional_info?.attendance_policy || "",
-      lesson_planning_guidelines: lessonPlan?.additional_info?.lesson_planning_guidelines || "",
+      lesson_planning_guidelines:
+        lessonPlan?.additional_info?.lesson_planning_guidelines || "",
       cie_guidelines: lessonPlan?.additional_info?.cie_guidelines || "",
-      self_study_guidelines: lessonPlan?.additional_info?.self_study_guidelines || "",
-      topics_beyond_syllabus: lessonPlan?.additional_info?.topics_beyond_syllabus || "",
-      reference_materials: lessonPlan?.additional_info?.reference_materials || "",
+      self_study_guidelines:
+        lessonPlan?.additional_info?.self_study_guidelines || "",
+      topics_beyond_syllabus:
+        lessonPlan?.additional_info?.topics_beyond_syllabus || "",
+      reference_materials:
+        lessonPlan?.additional_info?.reference_materials || "",
       academic_integrity: lessonPlan?.additional_info?.academic_integrity || "",
-      communication_channels: lessonPlan?.additional_info?.communication_channels || "",
-      interdisciplinary_integration: lessonPlan?.additional_info?.interdisciplinary_integration || "",
+      communication_channels:
+        lessonPlan?.additional_info?.communication_channels || "",
+      interdisciplinary_integration:
+        lessonPlan?.additional_info?.interdisciplinary_integration || "",
       events: lessonPlan?.additional_info?.events || [],
     },
-  })
+  });
 
   const {
     fields: eventFields,
@@ -99,7 +117,7 @@ export default function AdditionalInfoForm({ lessonPlan, setLessonPlan }: Additi
   } = useFieldArray({
     control,
     name: "events",
-  })
+  });
 
   const addEvent = () => {
     appendEvent({
@@ -113,73 +131,81 @@ export default function AdditionalInfoForm({ lessonPlan, setLessonPlan }: Additi
       expected_outcomes: "",
       skill_mapping: [],
       proposed_speaker: "",
-    })
-  }
+    });
+  };
 
   const onSubmit = async (data: AdditionalInfoFormValues) => {
-    setIsSaving(true)
+    setIsSaving(true);
     try {
       const result = await saveAdditionalInfoForm({
         faculty_id: userData?.id || "",
         subject_id: lessonPlan?.subject?.id || "",
         formData: data,
-      })
+      });
 
       if (result.success) {
-        toast.success("Additional information saved successfully!")
+        toast.success("Additional information saved successfully!");
         setLessonPlan((prev: any) => ({
           ...prev,
           additional_info: data,
-        }))
+        }));
       } else {
-        toast.error(result.error || "Failed to save additional information")
+        toast.error(result.error || "Failed to save additional information");
       }
     } catch (error) {
-      console.error("Error saving additional info:", error)
-      toast.error("An unexpected error occurred")
+      console.error("Error saving additional info:", error);
+      toast.error("An unexpected error occurred");
     } finally {
-      setIsSaving(false)
+      setIsSaving(false);
     }
-  }
+  };
 
   return (
     <form onSubmit={handleSubmit(onSubmit)} className="p-6 space-y-6">
       <div className="flex justify-between items-center">
-        <h3 className="text-lg font-semibold">Additional Planning Information</h3>
-        <Button type="submit" disabled={isSaving} className="bg-[#1A5CA1] hover:bg-[#154A80]">
-          <Save className="mr-2 h-4 w-4" />
-          {isSaving ? "Saving..." : "Save Additional Information"}
-        </Button>
+        <h3 className="text-lg font-semibold">
+          Additional Planning Information
+        </h3>
       </div>
 
       {/* Required Fields */}
       <div className="grid grid-cols-1 gap-6">
         <div>
           <Label htmlFor="classroom_conduct">
-            Classroom Conduct and Instructions <span className="text-red-500">*</span>
+            Classroom Conduct and Instructions{" "}
+            <span className="text-red-500">*</span>
           </Label>
           <Textarea
             id="classroom_conduct"
             placeholder="e.g. General expectations regarding student behavior, punctuality, discipline, and active participation."
             {...register("classroom_conduct")}
-            className="mt-1"
+            className="mt-2"
             rows={4}
           />
-          {errors.classroom_conduct && <p className="text-red-500 text-sm mt-1">{errors.classroom_conduct.message}</p>}
+          {errors.classroom_conduct && (
+            <p className="text-red-500 text-sm mt-1">
+              {errors.classroom_conduct.message}
+            </p>
+          )}
         </div>
 
         <div>
           <Label htmlFor="attendance_policy">
-            Attendance Policy and Criteria <span className="text-red-500">*</span>
+            Attendance Policy and Criteria{" "}
+            <span className="text-red-500">*</span>
           </Label>
           <Textarea
             id="attendance_policy"
             placeholder="e.g. Minimum attendance requirement, how attendance will be recorded, and consequences of short attendance."
             {...register("attendance_policy")}
-            className="mt-1"
+            className="mt-2"
             rows={4}
           />
-          {errors.attendance_policy && <p className="text-red-500 text-sm mt-1">{errors.attendance_policy.message}</p>}
+          {errors.attendance_policy && (
+            <p className="text-red-500 text-sm mt-1">
+              {errors.attendance_policy.message}
+            </p>
+          )}
         </div>
 
         <div>
@@ -190,41 +216,51 @@ export default function AdditionalInfoForm({ lessonPlan, setLessonPlan }: Additi
             id="cie_guidelines"
             placeholder='e.g. "Out of 5 CIEs conducted, the best 4 scores will be considered for final CIE calculation."'
             {...register("cie_guidelines")}
-            className="mt-1"
+            className="mt-2"
             rows={4}
           />
-          {errors.cie_guidelines && <p className="text-red-500 text-sm mt-1">{errors.cie_guidelines.message}</p>}
+          {errors.cie_guidelines && (
+            <p className="text-red-500 text-sm mt-1">
+              {errors.cie_guidelines.message}
+            </p>
+          )}
         </div>
 
         <div>
           <Label htmlFor="self_study_guidelines">
-            Self-Study/Homework Guidelines <span className="text-red-500">*</span>
+            Self-Study/Homework Guidelines{" "}
+            <span className="text-red-500">*</span>
           </Label>
           <Textarea
             id="self_study_guidelines"
             placeholder="e.g. Expectations for self-study topics, how they will be assessed, and their contribution to internal evaluation."
             {...register("self_study_guidelines")}
-            className="mt-1"
+            className="mt-2"
             rows={4}
           />
           {errors.self_study_guidelines && (
-            <p className="text-red-500 text-sm mt-1">{errors.self_study_guidelines.message}</p>
+            <p className="text-red-500 text-sm mt-1">
+              {errors.self_study_guidelines.message}
+            </p>
           )}
         </div>
 
         <div>
           <Label htmlFor="reference_materials">
-            Reference Materials and Tools <span className="text-red-500">*</span>
+            Reference Materials and Tools{" "}
+            <span className="text-red-500">*</span>
           </Label>
           <Textarea
             id="reference_materials"
             placeholder="e.g. Mention textbooks, reference books, software tools, platforms (e.g., Moodle, Google Classroom, etc.) used throughout the course."
             {...register("reference_materials")}
-            className="mt-1"
+            className="mt-2"
             rows={4}
           />
           {errors.reference_materials && (
-            <p className="text-red-500 text-sm mt-1">{errors.reference_materials.message}</p>
+            <p className="text-red-500 text-sm mt-1">
+              {errors.reference_materials.message}
+            </p>
           )}
         </div>
 
@@ -236,11 +272,13 @@ export default function AdditionalInfoForm({ lessonPlan, setLessonPlan }: Additi
             id="academic_integrity"
             placeholder="e.g. Guidelines regarding plagiarism, cheating in evaluations, and expectations for original work."
             {...register("academic_integrity")}
-            className="mt-1"
+            className="mt-2"
             rows={4}
           />
           {errors.academic_integrity && (
-            <p className="text-red-500 text-sm mt-1">{errors.academic_integrity.message}</p>
+            <p className="text-red-500 text-sm mt-1">
+              {errors.academic_integrity.message}
+            </p>
           )}
         </div>
 
@@ -252,11 +290,13 @@ export default function AdditionalInfoForm({ lessonPlan, setLessonPlan }: Additi
             id="communication_channels"
             placeholder="e.g. LMS will be the only official mode of communication for course announcements. You can provide details with class code or other relevant information."
             {...register("communication_channels")}
-            className="mt-1"
+            className="mt-2"
             rows={4}
           />
           {errors.communication_channels && (
-            <p className="text-red-500 text-sm mt-1">{errors.communication_channels.message}</p>
+            <p className="text-red-500 text-sm mt-1">
+              {errors.communication_channels.message}
+            </p>
           )}
         </div>
       </div>
@@ -264,23 +304,27 @@ export default function AdditionalInfoForm({ lessonPlan, setLessonPlan }: Additi
       {/* Optional Fields */}
       <div className="grid grid-cols-1 gap-6">
         <div>
-          <Label htmlFor="lesson_planning_guidelines">Lesson Planning Guidelines (Optional)</Label>
+          <Label htmlFor="lesson_planning_guidelines">
+            Lesson Planning Guidelines (Optional)
+          </Label>
           <Textarea
             id="lesson_planning_guidelines"
             placeholder="e.g. Overview of how lessons will be delivered etc."
             {...register("lesson_planning_guidelines")}
-            className="mt-1"
+            className="mt-2"
             rows={4}
           />
         </div>
 
         <div>
-          <Label htmlFor="topics_beyond_syllabus">Topics Beyond Syllabus (Optional)</Label>
+          <Label htmlFor="topics_beyond_syllabus">
+            Topics Beyond Syllabus (Optional)
+          </Label>
           <Textarea
             id="topics_beyond_syllabus"
             placeholder="e.g. Identify the topics that go beyond the prescribed syllabus to enrich student learning. These may include recent advancements & emerging trends, interdisciplinary applications, or practical case studies relevant to the subject."
             {...register("topics_beyond_syllabus")}
-            className="mt-1"
+            className="mt-2"
             rows={4}
           />
         </div>
@@ -293,7 +337,7 @@ export default function AdditionalInfoForm({ lessonPlan, setLessonPlan }: Additi
             id="interdisciplinary_integration"
             placeholder="e.g. Mention of any real-world case studies, industry problems, or mini-research elements integrated in the curriculum."
             {...register("interdisciplinary_integration")}
-            className="mt-1"
+            className="mt-2"
             rows={4}
           />
         </div>
@@ -304,7 +348,12 @@ export default function AdditionalInfoForm({ lessonPlan, setLessonPlan }: Additi
         <CardHeader>
           <div className="flex justify-between items-center">
             <CardTitle>Event Planning Details (Optional)</CardTitle>
-            <Button type="button" onClick={addEvent} variant="outline" size="sm">
+            <Button
+              type="button"
+              onClick={addEvent}
+              variant="outline"
+              size="sm"
+            >
               <Plus className="mr-2 h-4 w-4" />
               Add Event
             </Button>
@@ -313,7 +362,7 @@ export default function AdditionalInfoForm({ lessonPlan, setLessonPlan }: Additi
         <CardContent className="space-y-6">
           {eventFields.map((field, index) => (
             <Card key={field.id} className="p-4">
-              <div className="flex justify-between items-center mb-4">
+              <div className="flex justify-between items-center">
                 <h4 className="font-medium">Event {index + 1}</h4>
                 <Button
                   type="button"
@@ -328,12 +377,14 @@ export default function AdditionalInfoForm({ lessonPlan, setLessonPlan }: Additi
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
-                  <Label>
+                  <Label className="mb-2">
                     Event Type <span className="text-red-500">*</span>
                   </Label>
                   <Select
                     value={watch(`events.${index}.event_type`)}
-                    onValueChange={(value) => setValue(`events.${index}.event_type`, value as any)}
+                    onValueChange={(value) =>
+                      setValue(`events.${index}.event_type`, value as any)
+                    }
                   >
                     <SelectTrigger>
                       <SelectValue placeholder="Select event type" />
@@ -349,42 +400,62 @@ export default function AdditionalInfoForm({ lessonPlan, setLessonPlan }: Additi
                 </div>
 
                 <div>
-                  <Label>
-                    Tentative Event Title <span className="text-red-500">*</span>
+                  <Label className="mb-2">
+                    Tentative Event Title{" "}
+                    <span className="text-red-500">*</span>
                   </Label>
-                  <Input {...register(`events.${index}.tentative_title`)} placeholder="Enter event title" />
+                  <Input
+                    {...register(`events.${index}.tentative_title`)}
+                    placeholder="Enter event title"
+                  />
                   {errors.events?.[index]?.tentative_title && (
-                    <p className="text-red-500 text-sm mt-1">{errors.events[index]?.tentative_title?.message}</p>
+                    <p className="text-red-500 text-sm mt-1">
+                      {errors.events[index]?.tentative_title?.message}
+                    </p>
                   )}
                 </div>
 
                 <div>
-                  <Label>
+                  <Label className="mb-2">
                     Proposed Week <span className="text-red-500">*</span>
                   </Label>
-                  <Input {...register(`events.${index}.proposed_week`)} placeholder="e.g. Week 5" />
+                  <Input
+                    {...register(`events.${index}.proposed_week`)}
+                    placeholder="e.g. Week 5"
+                  />
                   {errors.events?.[index]?.proposed_week && (
-                    <p className="text-red-500 text-sm mt-1">{errors.events[index]?.proposed_week?.message}</p>
+                    <p className="text-red-500 text-sm mt-1">
+                      {errors.events[index]?.proposed_week?.message}
+                    </p>
                   )}
                 </div>
 
                 <div>
-                  <Label>
+                  <Label className="mb-2">
                     Duration (hours) <span className="text-red-500">*</span>
                   </Label>
-                  <Input type="number" min="1" {...register(`events.${index}.duration`)} placeholder="1" />
+                  <Input
+                    type="number"
+                    min="1"
+                    {...register(`events.${index}.duration`)}
+                    placeholder="1"
+                  />
                   {errors.events?.[index]?.duration && (
-                    <p className="text-red-500 text-sm mt-1">{errors.events[index]?.duration?.message}</p>
+                    <p className="text-red-500 text-sm mt-1">
+                      {errors.events[index]?.duration?.message}
+                    </p>
                   )}
                 </div>
 
                 <div>
-                  <Label>
+                  <Label className="mb-2">
                     Mode of Conduct <span className="text-red-500">*</span>
                   </Label>
                   <Select
                     value={watch(`events.${index}.mode_of_conduct`)}
-                    onValueChange={(value) => setValue(`events.${index}.mode_of_conduct`, value as any)}
+                    onValueChange={(value) =>
+                      setValue(`events.${index}.mode_of_conduct`, value as any)
+                    }
                   >
                     <SelectTrigger>
                       <SelectValue placeholder="Select mode" />
@@ -398,12 +469,15 @@ export default function AdditionalInfoForm({ lessonPlan, setLessonPlan }: Additi
                 </div>
 
                 <div>
-                  <Label>Proposed Speaker (Optional)</Label>
-                  <Input {...register(`events.${index}.proposed_speaker`)} placeholder="Enter speaker name" />
+                  <Label className="mb-2">Proposed Speaker (Optional)</Label>
+                  <Input
+                    {...register(`events.${index}.proposed_speaker`)}
+                    placeholder="Enter speaker name"
+                  />
                 </div>
 
                 <div className="md:col-span-2">
-                  <Label>
+                  <Label className="mb-2">
                     Expected Outcomes <span className="text-red-500">*</span>
                   </Label>
                   <Textarea
@@ -412,7 +486,9 @@ export default function AdditionalInfoForm({ lessonPlan, setLessonPlan }: Additi
                     rows={3}
                   />
                   {errors.events?.[index]?.expected_outcomes && (
-                    <p className="text-red-500 text-sm mt-1">{errors.events[index]?.expected_outcomes?.message}</p>
+                    <p className="text-red-500 text-sm mt-1">
+                      {errors.events[index]?.expected_outcomes?.message}
+                    </p>
                   )}
                 </div>
               </div>
@@ -426,6 +502,17 @@ export default function AdditionalInfoForm({ lessonPlan, setLessonPlan }: Additi
           )}
         </CardContent>
       </Card>
+
+      <div className="w-full flex justify-end">
+        <Button
+          type="submit"
+          disabled={isSaving}
+          className="bg-[#1A5CA1] hover:bg-[#154A80]"
+        >
+          <Save className="mr-2 h-4 w-4" />
+          {isSaving ? "Saving..." : "Save Additional Information"}
+        </Button>
+      </div>
     </form>
-  )
+  );
 }

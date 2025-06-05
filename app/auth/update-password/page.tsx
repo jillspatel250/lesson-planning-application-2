@@ -106,10 +106,10 @@ export default function UpdatePasswordPage() {
       </header>
 
       {/* Main */}
-      <main className="flex-1 flex items-center justify-around px-24">
+      <main className="flex-1 flex items-top justify-around px-24 pt-5">
         {/* Left illustration */}
         <div className="w-full md:w-1/2 flex flex-col items-center md:items-start max-w-xl">
-          <div className="relative w-full h-[600px]">
+          <div className="relative w-full h-[650px]">
             <Image
               src="/login-page.png"
               alt="Classroom illustration"
@@ -121,18 +121,7 @@ export default function UpdatePasswordPage() {
 
         {/* Right side - OTP / Password form */}
         <div className="w-full md:w-1/2 max-w-md">
-          <div className="mb-8 flex items-center justify-right gap-x-3 px-3">
-            <Image
-              src="/lesson-flow.png"
-              alt="Logo"
-              className="mt-3"
-              height={40}
-              width={40}
-            />
-            <h2 className="text-5xl font-bold text-[#1a5ca1]">LessonFlow</h2>
-          </div>
-
-          <h2 className="text-3xl font-bold mt-5 mb-2">
+          <h2 className="text-4xl font-bold mt-5 pt-5 mb-2">
             {isOtpVerified ? "Set New Password" : "Verify OTP"}
           </h2>
           <p className="text-muted-foreground mb-6">

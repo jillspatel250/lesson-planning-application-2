@@ -263,7 +263,7 @@ export default function FacultyDashboard() {
             <SelectContent>
               {uniqueRoles.map((role, idx) => (
                 <SelectItem value={role.role_name} key={idx}>
-                  {role.role_name}
+                  {role.role_name === "Faculty" ? "Subject Teacher" : role.role_name}
                 </SelectItem>
               ))}
             </SelectContent>
@@ -276,7 +276,7 @@ export default function FacultyDashboard() {
           Welcome {userData.name}
         </h2>
         <p className="text-xl text-gray-700 mb-1">
-          Faculty, {currentRole?.departments?.name || "Department"}
+          Subject Teacher, {currentRole?.departments?.name || "Department"}
         </p>
         <p className="text-xl text-gray-900 font-semibold uppercase tracking-wide">
           {currentRole?.departments?.institutes?.name || "Institute"}

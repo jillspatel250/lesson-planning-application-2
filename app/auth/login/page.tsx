@@ -65,9 +65,9 @@ export default function SignInPage() {
       </header>
 
       {/* Main content */}
-      <main className="flex-1 flex items-center justify-around px-24">
+      <main className="flex-1 flex items-top justify-around px-24 pt-5">
         <div className="w-full md:w-1/2 flex flex-col items-center md:items-start max-w-xl">
-          <div className="relative w-full h-[600px]">
+          <div className="relative w-full h-[650px]">
             <Image
               src="/login-page.png"
               alt="Classroom illustration"
@@ -79,24 +79,13 @@ export default function SignInPage() {
 
         {/* Right side - Login form */}
         <div className="w-full md:w-1/2 max-w-md">
-          <div className="mb-8 flex items-center justify-right gap-x-3 px-3">
-            <Image
-              src="/lesson-flow.png"
-              alt="Logo"
-              className="mt-3"
-              height={40}
-              width={40}
-            />
-            <h2 className="text-5xl font-bold text-[#1a5ca1]">LessonFlow</h2>
-          </div>
-
-          <div className="w-full">
+          <div className="w-full mt-5">
             <h3 className="text-4xl font-bold text-[#010922] pt-5 mb-6">
               Sign In
             </h3>
 
             <form onSubmit={handleSubmit}>
-              <div className="mb-6">
+              <div className="mb-6 pt-3">
                 <label
                   htmlFor="email"
                   className="block text-2xl font-medium text-[#010922] mb-2"
