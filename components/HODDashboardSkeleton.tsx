@@ -13,7 +13,7 @@ import { BookOpen, Users } from "lucide-react";
 
 export function HODDashboardSkeleton() {
   return (
-    <div className="animate-pulse">
+    <div className="animate-pulse px-5 pt-3">
       {/* Header skeleton */}
       <div className="flex justify-between items-center px-5 py-3 border-2 rounded-lg">
         <Skeleton className="h-7 w-48" />

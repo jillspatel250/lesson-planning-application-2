@@ -1,7 +1,7 @@
 //@ts-ignore
 "use client"
 
-import { useState, useEffect } from "react"
+import { useState, useEffect, useMemo } from "react"
 import { useRouter, useParams } from "next/navigation"
 import { Button } from "@/components/ui/button"
 import { Card } from "@/components/ui/card"
@@ -14,7 +14,6 @@ import PracticalPlanningForm from "@/components/lesson-plan/PracticalPlanningFor
 import CIEPlanningForm from "@/components/lesson-plan/CIEPlanningForm"
 import AdditionalInfoForm from "@/components/lesson-plan/AdditionalInfoForm"
 import { toast } from "sonner"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { useDashboardContext } from "@/context/DashboardContext"
 import { isSubjectTheoryOnly, isSubjectPracticalOnly, isSubjectBoth } from "@/utils/dateUtils"
 import { fetchLessonPlanById } from "@/app/dashboard/actions/fetchLessonPlanById"
@@ -130,21 +129,13 @@ export default function EditLessonPlanPage() {
         </div>
       )}
 
-      <div className="flex justify-between items-center mb-8">
-        <h1 className="text-3xl font-bold text-[#1A5CA1]">Lesson Planning</h1>
-        <div className="relative">
-          <Select defaultValue="subject-teacher">
-            <SelectTrigger className="w-[180px] bg-white">
-              <SelectValue placeholder="Subject Teacher" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="subject-teacher">Subject Teacher</SelectItem>
-            </SelectContent>
-          </Select>
-        </div>
+     <div className="flex justify-between items-center px-5 py-3 border-2 rounded-lg">
+        <p className="text-[#1A5CA1] font-manrope font-bold text-[25px] leading-[25px]">
+          Lesson Planning
+        </p>
       </div>
 
-      <div className="flex items-center justify-between mb-6">
+      <div className="flex items-center justify-between mb-6 mt-5">
         <div className="flex items-center gap-2">
           <Link href={`/dashboard/lesson-plans`}>
             <Button variant="outline" size="icon" className="h-8 w-8">

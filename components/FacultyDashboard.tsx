@@ -226,28 +226,7 @@ export default function FacultyDashboard() {
   };
 
   return (
-    <div className="min-h-screen">
-      {/* <div className="p-8 border-b border-gray-200">
-        <div className="flex justify-between items-center">
-          <h1 className="text-3xl font-bold text-[#1A5CA1]">Dashboard</h1>
-          {roleData.length > 1 && (
-            <div className="relative">
-              <Select value={currentRole?.role_name} onValueChange={handleRoleChange}>
-                <SelectTrigger className="w-[180px] bg-white border border-gray-300 rounded-lg">
-                  <SelectValue placeholder="Subject Teacher" />
-                </SelectTrigger>
-                <SelectContent>
-                  {roleData.map((role) => (
-                    <SelectItem key={role.id} value={role.role_name}>
-                      {role.role_name}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-          )}
-        </div>
-      </div> */}
+    <div className="min-h-screen pt-3 px-5">
       <div className="flex justify-between items-center px-5 py-3 border-2 rounded-lg">
         <p className="text-[#1A5CA1] font-manrope font-bold text-[25px] leading-[25px]">
           {currentRole.role_name} Dashboard
@@ -263,7 +242,9 @@ export default function FacultyDashboard() {
             <SelectContent>
               {uniqueRoles.map((role, idx) => (
                 <SelectItem value={role.role_name} key={idx}>
-                  {role.role_name === "Faculty" ? "Subject Teacher" : role.role_name}
+                  {role.role_name === "Faculty"
+                    ? "Subject Teacher"
+                    : role.role_name}
                 </SelectItem>
               ))}
             </SelectContent>
@@ -271,7 +252,7 @@ export default function FacultyDashboard() {
         </div>
       </div>
 
-      <div className="p-8">
+      <div className="pt-5 pl-2">
         <h2 className="text-3xl font-bold text-[#1A5CA1] mb-2">
           Welcome {userData.name}
         </h2>
