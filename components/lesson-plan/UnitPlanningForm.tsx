@@ -38,7 +38,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
-import { uuid as v4 } from "uuid";
+import { v4 as uuidv4 } from 'uuid';
 
 interface UnitPlanningFormProps {
   lessonPlan: any;
