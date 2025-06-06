@@ -72,7 +72,7 @@ export const addFaculty = async (formData: FormData) => {
       data: { 
         user: userData, 
         role: roleData,
-        tempPassword: randomPassword 
+        tempPassword: "1234" 
       } 
     };
   } catch (error) {
