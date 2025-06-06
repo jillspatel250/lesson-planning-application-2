@@ -38,6 +38,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
+import { uuid as v4 } from "uuid";
 
 interface UnitPlanningFormProps {
   lessonPlan: any;
@@ -82,7 +83,7 @@ export default function UnitPlanningForm({
           ? lessonPlan.units
           : [
               {
-                id: crypto.randomUUID(),
+                id: uuidv4(),
                 unit_name: "",
                 unit_topics: "",
                 probable_start_date: "",
@@ -253,7 +254,7 @@ export default function UnitPlanningForm({
     saveCurrentUnitToCache();
 
     const newUnit = {
-      id: crypto.randomUUID(),
+      id: uuidv4(),
       unit_name: "",
       unit_topics: "",
       probable_start_date: "",
