@@ -1,7 +1,6 @@
 "use server";
 import { createClient } from "@/utils/supabase/server";
 import { createAdminClient } from "@/utils/supabase/adminClient";
-import { v4 as uuid } from "uuid";
 
 export const addFaculty = async (formData: FormData) => {
   try {
@@ -11,26 +10,27 @@ export const addFaculty = async (formData: FormData) => {
     const subjectId = formData.get("subjectId") as string;
     const academicYear = formData.get("academicYear") as string;
     const division = formData.get("division") as string;
-    
+
     const supabaseAdmin = createAdminClient();
     const supabase = await createClient();
-    
+
     // Create user in Supabase Auth with random password
-    const { data: authData, error: authError } = await supabaseAdmin.auth.admin.createUser({
-      email,
-      password: "depstar@charusat",
-      email_confirm: true, 
-    });
-    
+    const { data: authData, error: authError } =
+      await supabaseAdmin.auth.admin.createUser({
+        email,
+        password: "depstar@charusat",
+        email_confirm: true,
+      });
+
     if (authError) {
       console.error("Auth error:", authError);
       return { success: false, error: authError.message };
     }
-    
+
     if (!authData.user) {
       return { success: false, error: "Failed to create user" };
     }
-    
+
     const { data: userData, error: userError } = await supabase
       .from("users")
       .insert({
@@ -40,13 +40,13 @@ export const addFaculty = async (formData: FormData) => {
       })
       .select("*")
       .single();
-    
+
     if (userError) {
       console.error("User table error:", userError);
       await supabaseAdmin.auth.admin.deleteUser(authData.user.id);
       return { success: false, error: userError.message };
     }
-    
+
     const { data: roleData, error: roleError } = await supabase
       .from("user_role")
       .insert({
@@ -59,21 +59,21 @@ export const addFaculty = async (formData: FormData) => {
       })
       .select("*")
       .single();
-    
+
     if (roleError) {
       console.error("User role error:", roleError);
       await supabase.from("users").delete().eq("auth_id", authData.user.id);
       await supabaseAdmin.auth.admin.deleteUser(authData.user.id);
       return { success: false, error: roleError.message };
     }
-    
-    return { 
-      success: true, 
-      data: { 
-        user: userData, 
+
+    return {
+      success: true,
+      data: {
+        user: userData,
         role: roleData,
-        tempPassword: "1234" 
-      } 
+        tempPassword: "1234",
+      },
     };
   } catch (error) {
     console.error("Unexpected error:", error);
@@ -86,16 +86,26 @@ export const editFaculty = async (formData: FormData) => {
     const id = formData.get("id") as string;
     const name = formData.get("name") as string;
     const email = formData.get("email") as string;
-    const subjectId = formData.get("subjectId") as string;
     const academicYear = formData.get("academicYear") as string;
     const division = formData.get("division") as string;
 
+    // Extract subject IDs from FormData array format
+    const subjectIds: string[] = [];
+    let index = 0;
+    while (formData.has(`subjectIds[${index}]`)) {
+      const subjectId = formData.get(`subjectIds[${index}]`) as string;
+      if (subjectId) {
+        subjectIds.push(subjectId);
+      }
+      index++;
+    }
+
     const supabase = await createClient();
 
-    // Get the current user_role to find the user_id
+    // Get the current user_role to find the user_id and depart_id
     const { data: currentRole, error: getCurrentError } = await supabase
       .from("user_role")
-      .select("user_id")
+      .select("user_id, depart_id")
       .eq("id", id)
       .single();
 
@@ -103,20 +113,15 @@ export const editFaculty = async (formData: FormData) => {
       return { success: false, error: getCurrentError.message };
     }
 
-    // Update user_role table
-    const { data: roleData, error: roleError } = await supabase
+    // Delete all existing user_role entries for this user with role "Faculty"
+    const { error: deleteError } = await supabase
       .from("user_role")
-      .update({
-        subject_id: subjectId || null,
-        academic_year: academicYear,
-        division,
-      })
-      .eq("id", id)
-      .select("*")
-      .single();
+      .delete()
+      .eq("user_id", currentRole.user_id)
+      .eq("role_name", "Faculty");
 
-    if (roleError) {
-      return { success: false, error: roleError.message };
+    if (deleteError) {
+      return { success: false, error: deleteError.message };
     }
 
     // Update users table
@@ -134,7 +139,26 @@ export const editFaculty = async (formData: FormData) => {
       return { success: false, error: userError.message };
     }
 
-    return { success: true, data: { user: userData, role: roleData } };
+    // Create new user_role entries for each selected subject
+    const roleEntries = subjectIds.map((subjectId) => ({
+      user_id: currentRole.user_id,
+      role_name: "Faculty",
+      depart_id: currentRole.depart_id,
+      subject_id: subjectId,
+      academic_year: academicYear,
+      division,
+    }));
+
+    const { data: roleData, error: roleError } = await supabase
+      .from("user_role")
+      .insert(roleEntries)
+      .select("*");
+
+    if (roleError) {
+      return { success: false, error: roleError.message };
+    }
+
+    return { success: true, data: { user: userData, roles: roleData } };
   } catch (error) {
     console.error("Unexpected error:", error);
     return { success: false, error: "An unexpected error occurred" };
@@ -189,7 +213,9 @@ export const deleteFaculty = async (roleId: string) => {
       }
 
       // Delete from auth
-      const { error: authDeleteError } = await supabase.auth.admin.deleteUser(roleData.user_id);
+      const { error: authDeleteError } = await supabase.auth.admin.deleteUser(
+        roleData.user_id
+      );
 
       if (authDeleteError) {
         console.error("Error deleting from auth:", authDeleteError);

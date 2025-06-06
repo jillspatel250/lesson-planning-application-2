@@ -160,6 +160,7 @@ interface Subjects {
 }
 
 interface User_Role {
+  filter(arg0: (f: { users: { email: string } }) => boolean): unknown
   depart_id: string | undefined
   id: string
   users: {

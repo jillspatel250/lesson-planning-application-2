@@ -87,7 +87,7 @@ const editFacultySchema = z.object({
   email: z.string().email("Please enter a valid email address"),
   name: z.string().min(2, "Name must be at least 2 characters"),
   departId: z.string(),
-  subjectId: z.string().optional(),
+  subjectIds: z.array(z.string()).min(1, "Please select at least one subject"),
   academicYear: z.string().min(4, "Please enter a valid academic year"),
   division: z.enum(["Division 1", "Division 2", "Division 1 & Division 2"], {
     required_error: "Please select a division",
@@ -155,6 +155,7 @@ export default function HODDashboard() {
     defaultValues: {
       id: "",
       departId: currentRole?.depart_id || "",
+      subjectIds: [],
       academicYear: new Date().getFullYear().toString(),
       division: "Division 1 & Division 2",
     },
@@ -353,7 +354,12 @@ export default function HODDashboard() {
 
     const formData = new FormData();
     Object.entries(values).forEach(([key, value]) => {
-      if (value !== undefined) {
+      if (key === "subjectIds" && Array.isArray(value)) {
+        // Handle array of subject IDs
+        value.forEach((subjectId, index) => {
+          formData.append(`subjectIds[${index}]`, subjectId);
+        });
+      } else if (value !== undefined) {
         formData.append(key, value.toString());
       }
     });
@@ -383,19 +389,28 @@ export default function HODDashboard() {
     }
   };
 
-  const handleEditFaculty = (faculty: User_Role) => {
-    console.log("Editing faculty:", faculty);
-    setSelectedFaculty(faculty);
+  const handleEditFaculty = (facultyMember: User_Role) => {
+    console.log("Editing faculty:", facultyMember);
+    setSelectedFaculty(facultyMember);
+
+    // Get all subject IDs for this faculty member by filtering the main faculty array
+    const facultySubjects = faculty.filter(
+      (f) => f.users?.email === facultyMember.users?.email
+    );
+    const subjectIds = facultySubjects
+      .map((f) => f.subjects?.id)
+      .filter(Boolean) as string[];
+
     editFacultyForm.reset({
-      id: faculty.id,
-      email: faculty.users?.email || "",
-      name: faculty.users?.name || "",
-      departId: faculty.depart_id,
-      subjectId: faculty.subjects?.id || "",
+      id: facultyMember.id,
+      email: facultyMember.users?.email || "",
+      name: facultyMember.users?.name || "",
+      departId: facultyMember.depart_id,
+      subjectIds: subjectIds,
       academicYear:
-        faculty.academic_year || new Date().getFullYear().toString(),
+        facultyMember.academic_year || new Date().getFullYear().toString(),
       division:
-        (faculty.division as
+        (facultyMember.division as
           | "Division 1"
           | "Division 2"
           | "Division 1 & Division 2") || "Division 1 & Division 2",
@@ -1318,7 +1333,7 @@ export default function HODDashboard() {
         open={editFacultyDialogOpen}
         onOpenChange={setEditFacultyDialogOpen}
       >
-        <DialogContent className="sm:max-w-[500px]">
+        <DialogContent className="sm:max-w-[550px]">
           <DialogHeader>
             <DialogTitle className="text-[#1A5CA1] font-manrope font-bold text-[22px] leading-[25px] mb-3">
               Edit Faculty
@@ -1370,8 +1385,8 @@ export default function HODDashboard() {
                         <Input
                           {...field}
                           type="email"
-                          placeholder="Enter email address"
-                          className="w-[230px]"
+                          placeholder="email@charusat.ac.in"
+                          className="w-[280px]"
                         />
                       </FormControl>
                       <FormMessage />
@@ -1382,84 +1397,102 @@ export default function HODDashboard() {
 
               <FormField
                 control={editFacultyForm.control}
-                name="subjectId"
+                name="subjectIds"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Subject</FormLabel>
-                    <Select onValueChange={field.onChange} value={field.value}>
-                      <FormControl>
-                        <SelectTrigger>
-                          <SelectValue placeholder="Select Subject" />
-                        </SelectTrigger>
-                      </FormControl>
-                      <SelectContent>
-                        {subjects.map((subject) => (
+                    <FormLabel>Subjects (Select Multiple)</FormLabel>
+                    <div className="grid grid-cols-2 gap-2 max-h-40 overflow-y-auto border rounded-md p-3">
+                      {subjects.map((subject) => (
+                        <div
+                          key={subject.id}
+                          className="flex items-center space-x-2"
+                        >
+                          <Checkbox
+                            id={subject.id}
+                            checked={field.value?.includes(subject.id)}
+                            onCheckedChange={(checked) => {
+                              const currentValues = field.value || [];
+                              if (checked) {
+                                field.onChange([...currentValues, subject.id]);
+                              } else {
+                                field.onChange(
+                                  currentValues.filter(
+                                    (id) => id !== subject.id
+                                  )
+                                );
+                              }
+                            }}
+                          />
+                          <label
+                            htmlFor={subject.id}
+                            className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 cursor-pointer"
+                          >
+                            {subject.abbreviation_name}
+                          </label>
+                        </div>
+                      ))}
+                    </div>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <div className="flex justify-between gap-x-4">
+                <FormField
+                  control={editFacultyForm.control}
+                  name="division"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Division</FormLabel>
+                      <Select
+                        onValueChange={field.onChange}
+                        value={field.value}
+                      >
+                        <FormControl>
+                          <SelectTrigger className="w-[300px]">
+                            <SelectValue placeholder="Select division" />
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
                           <SelectItem
                             className="cursor-pointer"
-                            key={subject.id}
-                            value={subject.id}
+                            value="Division 1"
                           >
-                            {subject.name} ({subject.abbreviation_name})
+                            Division 1
                           </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
+                          <SelectItem
+                            className="cursor-pointer"
+                            value="Division 2"
+                          >
+                            Division 2
+                          </SelectItem>
+                          <SelectItem
+                            className="cursor-pointer"
+                            value="Division 1 & Division 2"
+                          >
+                            Division 1 & Division 2
+                          </SelectItem>
+                        </SelectContent>
+                      </Select>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
 
-              <FormField
-                control={editFacultyForm.control}
-                name="academicYear"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Academic Year</FormLabel>
-                    <FormControl>
-                      <Input {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              <FormField
-                control={editFacultyForm.control}
-                name="division"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Division</FormLabel>
-                    <Select onValueChange={field.onChange} value={field.value}>
+                <FormField
+                  control={editFacultyForm.control}
+                  name="academicYear"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Academic Year</FormLabel>
                       <FormControl>
-                        <SelectTrigger>
-                          <SelectValue placeholder="Select division" />
-                        </SelectTrigger>
+                        <Input {...field} />
                       </FormControl>
-                      <SelectContent>
-                        <SelectItem
-                          className="cursor-pointer"
-                          value="Division 1"
-                        >
-                          Division 1
-                        </SelectItem>
-                        <SelectItem
-                          className="cursor-pointer"
-                          value="Division 2"
-                        >
-                          Division 2
-                        </SelectItem>
-                        <SelectItem
-                          className="cursor-pointer"
-                          value="Division 1 & Division 2"
-                        >
-                          Division 1 & Division 2
-                        </SelectItem>
-                      </SelectContent>
-                    </Select>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </div>
 
               <DialogFooter>
                 <div className="flex justify-between w-full">
