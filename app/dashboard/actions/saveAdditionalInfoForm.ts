@@ -23,12 +23,29 @@ export async function saveAdditionalInfoForm(data: z.infer<typeof saveAdditional
       return { success: false, error: fetchError.message }
     }
 
+    // Prepare the additional info data in BSON format structure
+    const additionalInfoData = {
+      faculty_id: validatedData.faculty_id,
+      subject_id: validatedData.subject_id,
+      classroom_conduct: validatedData.formData.classroom_conduct,
+      attendance_policy: validatedData.formData.attendance_policy,
+      lesson_planning_guidelines: validatedData.formData.lesson_planning_guidelines || "",
+      cie_guidelines: validatedData.formData.cie_guidelines,
+      self_study_guidelines: validatedData.formData.self_study_guidelines,
+      topics_beyond_syllabus: validatedData.formData.topics_beyond_syllabus || "",
+      reference_materials: validatedData.formData.reference_materials,
+      academic_integrity: validatedData.formData.academic_integrity,
+      communication_channels: validatedData.formData.communication_channels,
+      interdisciplinary_integration: validatedData.formData.interdisciplinary_integration || "",
+      events: validatedData.formData.events || [],
+    }
+
     if (existingForm) {
       // Update existing form
       const existingFormData = existingForm.form || {}
       const updatedFormData = {
         ...existingFormData,
-        additionalInfo: validatedData.formData,
+        additionalInfo: additionalInfoData,
       }
 
       const { error: updateError } = await supabase
@@ -43,7 +60,7 @@ export async function saveAdditionalInfoForm(data: z.infer<typeof saveAdditional
     } else {
       // Create new form with just additional info
       const formData = {
-        additionalInfo: validatedData.formData,
+        additionalInfo: additionalInfoData,
       }
 
       const { error: insertError } = await supabase.from("forms").insert({

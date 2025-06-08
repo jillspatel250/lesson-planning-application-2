@@ -318,3 +318,5 @@ export const deleteFacultyRole = async (roleId: string) => {
     return { success: false, error: "An unexpected error occurred" }
   }
 }
+
+
