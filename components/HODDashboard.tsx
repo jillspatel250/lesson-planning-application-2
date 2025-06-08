@@ -1,3 +1,7 @@
+<<<<<<< HEAD
+"use client"
+
+=======
 // // "use client"
 
 // // import { DialogTrigger } from "@/components/ui/dialog"
@@ -2729,6 +2733,7 @@
 
 "use client"
 
+>>>>>>> f085102a97e6b28967007edab955e4c11fb45b7b
 import { DialogTrigger } from "@/components/ui/dialog"
 import { useState, useEffect, useMemo } from "react"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
@@ -2836,6 +2841,20 @@ const editFacultySchema = z.object({
   }),
 })
 
+<<<<<<< HEAD
+const addSubjectSchema = z.object({
+  code: z.string().min(3, "Code must be at least 3 characters"),
+  name: z.string().min(3, "Name must be at least 3 characters"),
+  semester: z.coerce.number().int().min(1).max(8),
+  lectureHours: z.coerce.number().int().min(0),
+  labHours: z.coerce.number().int().min(0),
+  abbreviationName: z.string().min(2, "Abbreviation must be at least 2 characters"),
+  credits: z.coerce.number().int().min(1),
+  departmentId: z.string(),
+  isPractical: z.boolean(),
+  isTheory: z.boolean(),
+})
+=======
 const addSubjectSchema = z
   .object({
     code: z.string().min(3, "Code must be at least 3 characters"),
@@ -2871,6 +2890,7 @@ const addSubjectSchema = z
       path: ["termEndDate"],
     },
   )
+>>>>>>> f085102a97e6b28967007edab955e4c11fb45b7b
 
 export default function HODDashboard() {
   const { roleData, currentRole, setCurrentRole } = useDashboardContext()
@@ -3047,7 +3067,11 @@ export default function HODDashboard() {
 
       if (result.success) {
         const message = result.data?.isNewUser
+<<<<<<< HEAD
+          ? `Faculty added successfully !!}`
+=======
           ? `Faculty added successfully! ${result.data.tempPassword ? `Temporary password: ${result.data.tempPassword}` : ""}`
+>>>>>>> f085102a97e6b28967007edab955e4c11fb45b7b
           : "Faculty role assigned to existing user successfully!"
 
         toast.success(message)
@@ -3193,7 +3217,10 @@ export default function HODDashboard() {
         toast.success("Subject deleted successfully")
         setDeleteSubjectDialogOpen(false)
 
+<<<<<<< HEAD
+=======
         // Refresh both subjects and faculty data since faculty assignments may have changed
+>>>>>>> f085102a97e6b28967007edab955e4c11fb45b7b
         const [subjectData, facultyData] = await Promise.all([fetchSubjects(), fetchFaculty()])
 
         const departSubjects = subjectData.filter((subject) => subject.department_id === currentRole?.depart_id)
@@ -3231,7 +3258,11 @@ export default function HODDashboard() {
     try {
       const result = await addSubject(formData)
       if (result.success) {
+<<<<<<< HEAD
+        toast.success("Subject added successfully")
+=======
         toast.success("Subject added successfully with term dates")
+>>>>>>> f085102a97e6b28967007edab955e4c11fb45b7b
         subjectForm.reset({
           departmentId: currentRole.depart_id,
           semester: 1,
@@ -3240,15 +3271,21 @@ export default function HODDashboard() {
           credits: 0,
           isPractical: false,
           isTheory: true,
+<<<<<<< HEAD
+=======
           termStartDate: "",
           termEndDate: "",
+>>>>>>> f085102a97e6b28967007edab955e4c11fb45b7b
         })
 
         const subjectData = await fetchSubjects()
         const departSubjects = subjectData.filter((subject) => subject.department_id === currentRole.depart_id)
         setSubjects(departSubjects)
 
+<<<<<<< HEAD
+=======
         // Show PSO/PEO button in dialog after successful subject addition
+>>>>>>> f085102a97e6b28967007edab955e4c11fb45b7b
         setShowPsoPeoInDialog(true)
       } else {
         toast.error("Failed to add subject")

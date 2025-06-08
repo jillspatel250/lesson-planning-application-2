@@ -1,15 +1,22 @@
 "use client"
 
+import type React from "react"
+
 import { useState, useEffect, useMemo } from "react"
 import { useDashboardContext } from "@/context/DashboardContext"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
+import { Input } from "@/components/ui/input"
+import { Label } from "@/components/ui/label"
 import { Edit, Eye, Upload, FileText, ChevronDown, ChevronRight, Printer } from "lucide-react"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { fetchFaculty } from "@/app/dashboard/actions/fetchFaculty"
+import { uploadSyllabus, viewSyllabus } from "@/app/dashboard/actions/upload-view"
 import type { User_Role } from "@/types/types"
 import Link from "next/link"
 import type { RoleDataItem } from "@/context/DashboardContext"
+import { toast } from "sonner"
 
 export default function LessonPlansPage() {
   const { roleData, currentRole, setCurrentRole, userData } = useDashboardContext()
@@ -18,6 +25,10 @@ export default function LessonPlansPage() {
   const [expandedCards, setExpandedCards] = useState<{
     [key: string]: boolean
   }>({})
+  const [uploadDialogOpen, setUploadDialogOpen] = useState(false)
+  const [selectedSubjectId, setSelectedSubjectId] = useState<string | null>(null)
+  const [uploadFile, setUploadFile] = useState<File | null>(null)
+  const [isUploading, setIsUploading] = useState(false)
 
   const uniqueRoles = useMemo(() => {
     const unique = new Map<string, RoleDataItem>()
@@ -34,7 +45,7 @@ export default function LessonPlansPage() {
       try {
         setIsLoading(true)
 
-        // Only fetch subjects if current role is Faculty
+        // Only fetch subjects if currentRole?.role_name is Faculty
         if (currentRole?.role_name === "Faculty") {
           // Fetch faculty assignments from the HOD's subject assignments
           const facultyData = await fetchFaculty()
@@ -101,6 +112,71 @@ export default function LessonPlansPage() {
       console.log("Role changed successfully to:", selectedRole)
     } else {
       console.error("Role not found:", roleName)
+    }
+  }
+
+  const handleUploadClick = (subjectId: string) => {
+    setSelectedSubjectId(subjectId)
+    setUploadDialogOpen(true)
+  }
+
+  const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0]
+    if (file) {
+      if (file.type === "application/pdf") {
+        setUploadFile(file)
+      } else {
+        toast("Please select a PDF file only.")
+        event.target.value = ""
+      }
+    }
+  }
+
+  const handleUploadSubmit = async () => {
+    if (!uploadFile || !selectedSubjectId || !userData?.auth_id) {
+      toast("Please select a file and ensure you're logged in.")
+      return
+    }
+
+    setIsUploading(true);
+    toast("This process may take a while, please wait...");
+
+    try {
+      const result = await uploadSyllabus(uploadFile, selectedSubjectId, userData.auth_id)
+
+      if (result.success) {
+        toast("Syllabus uploaded successfully!")
+        setUploadDialogOpen(false)
+        setUploadFile(null)
+        setSelectedSubjectId(null)
+      } else {
+        toast("Failed to upload syllabus.")
+      }
+    } catch (error) {
+      console.error("Upload error:", error)
+      toast("An unexpected error occurred.")
+    } finally {
+      setIsUploading(false)
+    }
+  }
+
+  const handleViewSyllabus = async (subjectId: string) => {
+    if (!userData?.auth_id) {
+      toast("Please ensure you're logged in.")
+      return
+    }
+
+    try {
+      const result = await viewSyllabus(subjectId, userData.auth_id)
+
+      if (result.success && result.url) {
+        window.open(result.url, "_blank")
+      } else {
+        toast("No syllabus has been uploaded for this subject.")
+      }
+    } catch (error) {
+      console.error("View error:", error)
+      toast("Failed to retrieve syllabus.")
     }
   }
 
@@ -191,11 +267,21 @@ export default function LessonPlansPage() {
                       </div>
 
                       <div className="grid grid-cols-2 gap-2 mb-4">
-                        <Button size="sm" variant="outline" className="w-full">
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          className="w-full"
+                          onClick={() => handleUploadClick(subject.id)}
+                        >
                           <Upload className="h-4 w-4 mr-1" />
                           Upload Syllabus
                         </Button>
-                        <Button size="sm" variant="outline" className="w-full">
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          className="w-full"
+                          onClick={() => handleViewSyllabus(subject.id)}
+                        >
                           <FileText className="h-4 w-4 mr-1" />
                           View Syllabus
                         </Button>
@@ -303,6 +389,46 @@ export default function LessonPlansPage() {
           </div>
         )}
       </div>
+
+      {/* Upload Syllabus Dialog */}
+      <Dialog open={uploadDialogOpen} onOpenChange={setUploadDialogOpen}>
+        <DialogContent className="sm:max-w-[425px]">
+          <DialogHeader>
+            <DialogTitle className="text-[#1A5CA1] font-manrope font-bold text-[20px] leading-[25px]">Upload Syllabus</DialogTitle>
+          </DialogHeader>
+          <div className="grid gap-4 py-4">
+            <div className="grid gap-2">
+              <Label htmlFor="syllabus-file">Select PDF File</Label>
+              <Input
+                id="syllabus-file"
+                type="file"
+                accept=".pdf"
+                onChange={handleFileChange}
+                className="cursor-pointer"
+              />
+            </div>
+          </div>
+          <div className="flex justify-between gap-2">
+            <Button
+              variant="outline"
+              onClick={() => {
+                setUploadDialogOpen(false)
+                setUploadFile(null)
+                setSelectedSubjectId(null)
+              }}
+            >
+              Cancel
+            </Button>
+            <Button
+              onClick={handleUploadSubmit}
+              disabled={!uploadFile || isUploading}
+              className="bg-[#1A5CA1] hover:bg-[#154A80]"
+            >
+              {isUploading ? "Uploading..." : "Upload"}
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   )
 }

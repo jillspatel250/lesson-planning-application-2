@@ -27,7 +27,6 @@ export const addFaculty = async (formData: FormData) => {
     let userData: any
 
     if (existingUser) {
-      // User already exists, use existing auth_id
       authUserId = existingUser.auth_id
       userData = existingUser
 
@@ -47,7 +46,6 @@ export const addFaculty = async (formData: FormData) => {
         userData = updatedUser
       }
     } else {
-      // Create new user in Supabase Auth
       const { data: authData, error: authError } = await supabaseAdmin.auth.admin.createUser({
         email,
         password: "depstar@charusat",
@@ -65,7 +63,6 @@ export const addFaculty = async (formData: FormData) => {
 
       authUserId = authData.user.id
 
-      // Create user in users table
       const { data: newUserData, error: userError } = await supabase
         .from("users")
         .insert({
@@ -78,7 +75,6 @@ export const addFaculty = async (formData: FormData) => {
 
       if (userError) {
         console.error("User table error:", userError)
-        // Cleanup: delete auth user if users table insertion fails
         await supabaseAdmin.auth.admin.deleteUser(authUserId)
         return { success: false, error: userError.message }
       }
@@ -86,7 +82,6 @@ export const addFaculty = async (formData: FormData) => {
       userData = newUserData
     }
 
-    // Check if faculty role already exists for this user in this department
     const { data: existingRole, error: roleCheckError } = await supabase
       .from("user_role")
       .select("*")
@@ -100,7 +95,6 @@ export const addFaculty = async (formData: FormData) => {
       return { success: false, error: "Faculty role already exists for this user and subject" }
     }
 
-    // Create user role
     const { data: roleData, error: roleError } = await supabase
       .from("user_role")
       .insert({
@@ -116,7 +110,6 @@ export const addFaculty = async (formData: FormData) => {
 
     if (roleError) {
       console.error("User role error:", roleError)
-      // Only delete user and auth if this was a new user creation
       if (!existingUser) {
         await supabase.from("users").delete().eq("auth_id", authUserId)
         await supabaseAdmin.auth.admin.deleteUser(authUserId)
@@ -130,7 +123,6 @@ export const addFaculty = async (formData: FormData) => {
         user: userData,
         role: roleData,
         isNewUser: !existingUser,
-        tempPassword: existingUser ? null : "depstar@charusat",
       },
     }
   } catch (error) {
@@ -147,7 +139,6 @@ export const editFaculty = async (formData: FormData) => {
     const academicYear = formData.get("academicYear") as string
     const division = formData.get("division") as string
 
-    // Extract subject IDs from FormData array format
     const subjectIds: string[] = []
     let index = 0
     while (formData.has(`subjectIds[${index}]`)) {
@@ -164,7 +155,6 @@ export const editFaculty = async (formData: FormData) => {
 
     const supabase = await createClient()
 
-    // Get the current user_role to find the user_id and depart_id
     const { data: currentRole, error: getCurrentError } = await supabase
       .from("user_role")
       .select("user_id, depart_id")
@@ -175,7 +165,6 @@ export const editFaculty = async (formData: FormData) => {
       return { success: false, error: getCurrentError.message }
     }
 
-    // Update users table first
     const { data: userData, error: userError } = await supabase
       .from("users")
       .update({
@@ -190,7 +179,6 @@ export const editFaculty = async (formData: FormData) => {
       return { success: false, error: userError.message }
     }
 
-    // Delete all existing user_role entries for this user with role "Faculty" in this department
     const { error: deleteError } = await supabase
       .from("user_role")
       .delete()
@@ -267,7 +255,6 @@ export const deleteFacultyRole = async (roleId: string) => {
     const supabase = await createClient()
     const supabaseAdmin = createAdminClient()
 
-    // Get the user_id before deleting the role
     const { data: roleData, error: getRoleError } = await supabase
       .from("user_role")
       .select("user_id")
@@ -285,7 +272,6 @@ export const deleteFacultyRole = async (roleId: string) => {
       return { success: false, error: roleDeleteError.message }
     }
 
-    // Check if user has other roles
     const { data: otherRoles, error: checkRolesError } = await supabase
       .from("user_role")
       .select("id")
@@ -295,7 +281,6 @@ export const deleteFacultyRole = async (roleId: string) => {
       return { success: false, error: checkRolesError.message }
     }
 
-    // If no other roles exist, delete the user from users table and auth
     if (otherRoles.length === 0) {
       // Delete from users table
       const { error: userDeleteError } = await supabase.from("users").delete().eq("auth_id", roleData.user_id)
@@ -318,5 +303,3 @@ export const deleteFacultyRole = async (roleId: string) => {
     return { success: false, error: "An unexpected error occurred" }
   }
 }
-
-
