@@ -1,0 +1,177 @@
+export interface TimeTable {
+  id: string;
+  day: string;
+  type: string;
+  subject: string;
+  faculty: string;
+  department: string;
+  to: string;
+  from: string;
+  division: number;
+  batch: string | null;
+  sem: number;
+}
+
+export const timeTableData: TimeTable[] = [
+  {
+    id: "361f11ef-69f0-4d34-8f4a-c835155b107f",
+    day: "Monday",
+    type: "Lab",
+    subject: "17a75128-498d-4aeb-8da9-3af0c7bce88d",
+    faculty: "2d8711ec-57eb-4bd6-8028-3f0593af8638",
+    department: "d76a381e-0f08-464c-8eea-e2529db86a32",
+    to: "2025-05-28T11:09:00+00:00",
+    from: "2025-05-28T09:10:00+00:00",
+    division: 1,
+    batch: "B",
+    sem: 2,
+  },
+  {
+    id: "361f11ef-69f0-4d34-8f4a-c835155b108f",
+    day: "Monday",
+    type: "Lab",
+    subject: "17a75128-498d-4aeb-8da9-3af0c7bce88d",
+    faculty: "2d8711ec-57eb-4bd6-8028-3f0593af8639",
+    department: "d76a381e-0f08-464c-8eea-e2529db86a32",
+    to: "2025-05-28T11:09:00+00:00",
+    from: "2025-05-28T09:10:00+00:00",
+    division: 1,
+    batch: "A",
+    sem: 2,
+  },
+  {
+    id: "376eaae1-1f02-4d46-b4bc-aa33d5f64d3b",
+    day: "Tuesday",
+    type: "Lecture",
+    subject: "17a75128-498d-4aeb-8da9-3af0c7bce88d",
+    faculty: "2d8711ec-57eb-4bd6-8028-3f0593af8638",
+    department: "2f69c6cf-e197-4a19-81e2-f70c68ffb52e",
+    to: "2025-05-28T11:10:00+00:00",
+    from: "2025-05-28T10:10:00+00:00",
+    division: 2,
+    batch: null,
+    sem: 2,
+  },
+  {
+    id: "376eaae1-1f02-4d46-b4bc-aa33d5f64d4b",
+    day: "Tuesday",
+    type: "Lecture",
+    subject: "17a75128-498d-4aeb-8da9-3af0c7bce88d",
+    faculty: "2d8711ec-57eb-4bd6-8028-3f0593af8639",
+    department: "2f69c6cf-e197-4a19-81e2-f70c68ffb52e",
+    to: "2025-05-28T11:10:00+00:00",
+    from: "2025-05-28T10:10:00+00:00",
+    division: 1,
+    batch: null,
+    sem: 2,
+  },
+  {
+    id: "a7d1d009-c7bd-4ac8-9e11-a3cda9a76665",
+    day: "Wednesday",
+    type: "Lecture",
+    subject: "db346c48-599d-4452-9585-75879f182e23",
+    faculty: "2d8711ec-57eb-4bd6-8028-3f0593af8638",
+    department: "60c6475c-f3b6-4ad0-b006-bc81e7990921",
+    to: "2025-07-01T03:50:20+00:00",
+    from: "2025-07-01T04:50:00+00:00",
+    division: 1,
+    batch: "",
+    sem: 2,
+  },
+  {
+    id: "a7d1d009-c7bd-4ac8-9e11-a3cda9a76565",
+    day: "Thursday",
+    type: "Lecture",
+    subject: "db346c48-599d-4452-9585-75879f182e23",
+    faculty: "2d8711ec-57eb-4bd6-8028-3f0593af8638",
+    department: "60c6475c-f3b6-4ad0-b006-bc81e7990921",
+    to: "2025-07-01T04:50:20+00:00",
+    from: "2025-07-01T02:50:00+00:00",
+    division: 1,
+    batch: "",
+    sem: 2,
+  },
+  {
+    id: "a7d1d009-c7bd-4ac8-9e11-a3cda9a76565",
+    day: "Thursday",
+    type: "Lab",
+    subject: "db346c48-599d-4452-9585-75879f182e23",
+    faculty: "2d8711ec-57eb-4bd6-8028-3f0593af8638",
+    department: "60c6475c-f3b6-4ad0-b006-bc81e7990921",
+    to: "2025-07-01T14:09:00+00:00",
+    from: "2025-07-01T12:10:00+00:00",
+    division: 1,
+    batch: "A",
+    sem: 2,
+  },
+  {
+    id: "a7d1d009-c7bd-4ac8-9e11-a3cea9a76565",
+    day: "Thursday",
+    type: "Lab",
+    subject: "db346c48-599d-4452-9585-75879f182e23",
+    faculty: "2d8711ec-57eb-4bd6-8028-3f0593af8638",
+    department: "60c6475c-f3b6-4ad0-b006-bc81e7990921",
+    to: "2025-07-01T14:09:00+00:00",
+    from: "2025-07-01T12:10:00+00:00",
+    division: 1,
+    batch: "B",
+    sem: 2,
+  }, // Additional entries to test multiple labs side by side
+  {
+    id: "lab-friday-1",
+    day: "Friday",
+    type: "Lab",
+    subject: "17a75128-498d-4aeb-8da9-3af0c7bce88d",
+    faculty: "2d8711ec-57eb-4bd6-8028-3f0593af8638",
+    department: "d76a381e-0f08-464c-8eea-e2529db86a32",
+    to: "2025-05-30T15:19:00+00:00",
+    from: "2025-05-30T14:20:00+00:00",
+    division: 1,
+    batch: "A",
+    sem: 2,
+  },
+  {
+    id: "lab-friday-2",
+    day: "Friday",
+    type: "Lab",
+    subject: "17a75128-498d-4aeb-8da9-3af0c7bce88d",
+    faculty: "2d8711ec-57eb-4bd6-8028-3f0593af8639",
+    department: "d76a381e-0f08-464c-8eea-e2529db86a32",
+    to: "2025-05-30T15:19:00+00:00",
+    from: "2025-05-30T14:20:00+00:00",
+    division: 1,
+    batch: "B",
+    sem: 2,
+  },
+  // More test data for Saturday with multiple lectures
+  {
+    id: "sat-lecture-1",
+    day: "Saturday",
+    type: "Lecture",
+    subject: "17a75128-498d-4aeb-8da9-3af0c7bce88d",
+    faculty: "2d8711ec-57eb-4bd6-8028-3f0593af8638",
+    department: "d76a381e-0f08-464c-8eea-e2529db86a32",
+    to: "2025-05-31T10:09:00+00:00",
+    from: "2025-05-31T09:10:00+00:00",
+    division: 1,
+    batch: null,
+    sem: 2,
+  },
+  {
+    id: "sat-lecture-2",
+    day: "Saturday",
+    type: "Lecture",
+    subject: "17a75128-498d-4aeb-8da9-3af0c7bce88d",
+    faculty: "2d8711ec-57eb-4bd6-8028-3f0593af8639",
+    department: "d76a381e-0f08-464c-8eea-e2529db86a32",
+    to: "2025-05-31T10:09:00+00:00",
+    from: "2025-05-31T09:10:00+00:00",
+    division: 2,
+    batch: null,
+    sem: 2,
+  },
+];
+
+export const academicYears = ["2023-2024", "2024-2025", "2025-2026"];
+export const terms = ["Odd", "Even"];
+export const loadDetails = ["Time Table", "Details", "Summary"];
