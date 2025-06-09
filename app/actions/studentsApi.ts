@@ -53,3 +53,58 @@ export async function getStudentById(student_id: string) {
   if (error) throw error;
   return data;
 }
+
+// Get all students by division
+export async function getStudentsBySem(sem: string) {
+  const supabase = await createClient();
+  const { data, error } = await supabase
+    .from('student_data')
+    .select()
+    .eq('sem', sem);
+  if (error) throw error;
+  return data;
+}
+
+// Get all students by division and sem
+export async function getStudentsByDivisionAndSem(
+  division: string,
+  sem: string
+) {
+  const supabase = await createClient();
+  const { data, error } = await supabase
+    .from('student_data')
+    .select()
+    .eq('division', division)
+    .eq('sem', sem);
+  if (error) throw error;
+  return data;
+}
+
+// Get all students by division, batch, and sem
+export async function getStudentsByDivisionBatchAndSem(
+  division: string,
+  batch: string,
+  sem: string
+) {
+  const supabase = await createClient();
+  const { data, error } = await supabase
+    .from('student_data')
+    .select()
+    .eq('division', division)
+    .eq('batch', batch)
+    .eq('sem', sem);
+  if (error) throw error;
+  return data;
+}
+
+export async function getStudentAttendanceAverage(student_id: string) {
+  const supabase = await createClient();
+
+  const { data, error } = await supabase.rpc('get_attendance_average', {
+    student_id,
+  });
+
+  if (error) throw error;
+
+  return data ?? 0; // data is the average
+}
