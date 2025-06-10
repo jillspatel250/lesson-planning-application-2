@@ -1,21 +1,3 @@
-// "use server";
-
-// import { createClient } from "@/utils/supabase/server";
-
-// export const fetchUsers= async () => {
-//   const supabase = await createClient();
-//   const { data: userData, error } = await supabase
-//     .from("users")
-//     .select("*");
-
-//   if (error) {
-//     console.error("Error fetching user data:", error);
-//     return [];
-//   } 
-
-//   return userData;
-// };
-
 "use server"
 
 import { createClient } from "@/utils/supabase/server";
@@ -31,9 +13,7 @@ export const fetchUsers = async () => {
   if (userError) {
     console.error("Error fetching user data:", userError);
     return { userData: [], roleData: [] };
-  } else {
-    console.log("User data fetched successfully:", user);
-  }
+  } 
 
   // Fetch role data
   const { data: roles, error: roleError } = await supabase

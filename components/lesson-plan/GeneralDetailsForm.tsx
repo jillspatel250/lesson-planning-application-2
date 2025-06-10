@@ -1016,7 +1016,7 @@ export default function GeneralDetailsForm({ lessonPlan, setLessonPlan, openPdfV
             type="text"
             value={termStartDate || "Not set by HOD"}
             disabled
-            className={`mt-1 ${termStartDate ? "bg-green-50 border-green-200" : "bg-gray-50"}`}
+            className="mt-1 bg-gray-50"
           />
           <p className={`text-xs mt-1 font-medium ${termStartDate ? "text-green-600" : "text-blue-600"}`}>
           </p>
@@ -1028,7 +1028,7 @@ export default function GeneralDetailsForm({ lessonPlan, setLessonPlan, openPdfV
             type="text"
             value={termEndDate || "Not set by HOD"}
             disabled
-            className={`mt-1 ${termEndDate ? "bg-green-50 border-green-200" : "bg-gray-50"}`}
+            className="mt-1 bg-gray-50"
           />
           <p className={`text-xs mt-1 font-medium ${termEndDate ? "text-green-600" : "text-blue-600"}`}>
           </p>

@@ -21,8 +21,6 @@ export const addFaculty = async (formData: FormData) => {
       .eq("email", email)
       .single()
 
-    console.log("Existing user data:", existingUser)
-
     let authUserId: string
     let userData: any
 

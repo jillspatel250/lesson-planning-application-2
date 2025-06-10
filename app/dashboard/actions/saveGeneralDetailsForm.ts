@@ -5,7 +5,6 @@ import { createClient } from "@/utils/supabase/server"
 import { revalidatePath } from "next/cache"
 
 export async function saveGeneralDetailsForm(formData: any) {
-  console.log("Server action received form data:", formData)
 
   try {
     const supabase = await createClient()
@@ -20,8 +19,6 @@ export async function saveGeneralDetailsForm(formData: any) {
       console.error("Authentication error:", authError)
       return { success: false, error: "User not authenticated" }
     }
-
-    console.log("Authenticated user:", user.id)
 
     // Find the user record in the users table
     const { data: userData, error: userError } = await supabase
@@ -53,8 +50,6 @@ export async function saveGeneralDetailsForm(formData: any) {
       }
     }
 
-    console.log("Found user in database:", userData)
-
     const faculty_id = userData.id
 
     // Check if a form already exists for this faculty and subject
@@ -64,8 +59,6 @@ export async function saveGeneralDetailsForm(formData: any) {
       .eq("faculty_id", faculty_id)
       .eq("subject_id", formData.subject_id)
       .single()
-
-    console.log("Existing form check:", existingForm, fetchError)
 
     // Ensure dates are properly formatted as Date objects for storage
     const term_start_date =
@@ -90,12 +83,9 @@ export async function saveGeneralDetailsForm(formData: any) {
       },
     }
 
-    console.log("Form data to save:", formDataToSave)
-
     let result
 
     if (existingForm) {
-      console.log("Updating existing form...")
       // Update existing form - merge with existing data
       const existingFormData = existingForm.form || {}
       const updatedFormData = {
@@ -105,7 +95,6 @@ export async function saveGeneralDetailsForm(formData: any) {
 
       result = await supabase.from("forms").update({ form: updatedFormData }).eq("id", existingForm.id)
     } else {
-      console.log("Creating new form...")
       // Create new form
       result = await supabase.from("forms").insert({
         faculty_id: faculty_id,
@@ -113,8 +102,6 @@ export async function saveGeneralDetailsForm(formData: any) {
         form: formDataToSave,
       })
     }
-
-    console.log("Database operation result:", result)
 
     if (result.error) {
       console.error("Error saving form:", result.error)
