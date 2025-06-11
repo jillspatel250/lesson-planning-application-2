@@ -1,56 +1,69 @@
-"use client"
+"use client";
 
-import { useState, useEffect, useRef } from "react"
-import { useParams } from "next/navigation"
-import { fetchLessonPlanById } from "@/app/dashboard/actions/fetchLessonPlanById"
-import { Button } from "@/components/ui/button"
-import { Printer } from "lucide-react"
+import { useState, useEffect, useRef } from "react";
+import { useParams } from "next/navigation";
+import { fetchLessonPlanById } from "@/app/dashboard/actions/fetchLessonPlanById";
+import { Button } from "@/components/ui/button";
+import { Printer } from "lucide-react";
 
 export default function PrintLessonPlanPage() {
-  const params = useParams()
-  const [isLoading, setIsLoading] = useState(true)
-  const [lessonPlan, setLessonPlan] = useState<any>(null)
-  const hasPrinted = useRef(false)
+  const params = useParams();
+  const [isLoading, setIsLoading] = useState(true);
+  const [lessonPlan, setLessonPlan] = useState<any>(null);
+  const hasPrinted = useRef(false);
 
   useEffect(() => {
     const loadLessonPlan = async () => {
       try {
-        setIsLoading(true)
-        const result = await fetchLessonPlanById(params.id as string)
+        setIsLoading(true);
+        const result = await fetchLessonPlanById(params.id as string);
 
         if (result.success) {
-          setLessonPlan(result.data)
+          setLessonPlan(result.data);
         } else {
-          console.error(result.error || "Failed to load lesson plan")
+          console.error(result.error || "Failed to load lesson plan");
         }
       } catch (error) {
-        console.error("Error loading lesson plan:", error)
+        console.error("Error loading lesson plan:", error);
       } finally {
-        setIsLoading(false)
+        setIsLoading(false);
       }
-    }
+    };
 
     if (params.id) {
-      loadLessonPlan()
+      loadLessonPlan();
     }
-  }, [params.id])
+  }, [params.id]);
+
+  useEffect(() => {
+    if (lessonPlan && !isLoading && !hasPrinted.current) {
+      setTimeout(() => {
+        window.print();
+        hasPrinted.current = true;
+      }, 200);
+    }
+  }, [lessonPlan, isLoading]);
 
   const handlePrint = () => {
-    window.print()
-  }
+    window.print();
+  };
 
   // Helper function to format date in DDMMYYYY format
   const formatDate = (dateString: string) => {
-    if (!dateString) return "N/A"
-    const date = new Date(dateString)
-    const day = String(date.getDate()).padStart(2, "0")
-    const month = String(date.getMonth() + 1).padStart(2, "0")
-    const year = date.getFullYear()
-    return `${day}/${month}/${year}`
-  }
+    if (!dateString) return "N/A";
+    const date = new Date(dateString);
+    const day = String(date.getDate()).padStart(2, "0");
+    const month = String(date.getMonth() + 1).padStart(2, "0");
+    const year = date.getFullYear();
+    return `${day}/${month}/${year}`;
+  };
 
   if (isLoading) {
-    return <div className="flex justify-center items-center h-64">Loading lesson plan for printing...</div>
+    return (
+      <div className="flex justify-center items-center h-64">
+        Loading lesson plan for printing...
+      </div>
+    );
   }
 
   if (!lessonPlan) {
@@ -58,7 +71,7 @@ export default function PrintLessonPlanPage() {
       <div className="text-center text-red-500">
         Lesson plan not found or you don&apos;t have permission to view it.
       </div>
-    )
+    );
   }
 
   return (
@@ -71,149 +84,164 @@ export default function PrintLessonPlanPage() {
         </Button>
       </div>
 
-      <div className="w-full p-8 bg-white text-black font-sans" style={{ fontFamily: "Arial, sans-serif" }}>
+      <div
+        className="w-full p-8 bg-white text-black font-sans"
+        style={{ fontFamily: "Arial, sans-serif" }}
+      >
         <style jsx global>{`
-  @page {
-    size: A4;
-    margin: 15mm 10mm 15mm 10mm;
-  }
+          @page {
+            size: A4;
+            margin: 15mm 10mm 15mm 10mm;
+          }
 
-  @media print {
-    * {
-      -webkit-print-color-adjust: exact !important;
-      print-color-adjust: exact !important;
-    }
+          @media print {
+            * {
+              -webkit-print-color-adjust: exact !important;
+              print-color-adjust: exact !important;
+            }
 
-    body {
-      width: 100%;
-      margin: 0;
-      padding: 0;
-      font-family: Arial, sans-serif !important;
-    }
+            body {
+              width: 100%;
+              margin: 0;
+              padding: 0;
+              font-family: Arial, sans-serif !important;
+            }
 
-    /* Hide all non-essential elements during print */
-    .print\\:hidden {
-      display: none !important;
-    }
+            /* Hide all non-essential elements during print */
+            .print\\:hidden {
+              display: none !important;
+            }
 
-    /* Ensure proper page breaks */
-    .page-break-before {
-      page-break-before: always;
-    }
-    
-    .page-break-after {
-      page-break-after: always;
-    }
+            /* Ensure proper page breaks */
+            .page-break-before {
+              page-break-before: always;
+            }
 
-    /* Section headers should not break */
-    h1, h2, h3, h4, h5, h6 {
-      page-break-after: avoid;
-      page-break-inside: avoid;
-    }
+            .page-break-after {
+              page-break-after: always;
+            }
 
-    /* Keep table headers with content */
-    thead {
-      display: table-header-group;
-    }
+            /* Section headers should not break */
+            h1,
+            h2,
+            h3,
+            h4,
+            h5,
+            h6 {
+              page-break-after: avoid;
+              page-break-inside: avoid;
+            }
 
-    /* Table styling for print */
-    table {
-      width: 100% !important;
-      border-collapse: collapse !important;
-      table-layout: fixed !important;
-      page-break-inside: auto;
-    }
+            /* Keep table headers with content */
+            thead {
+              display: table-header-group;
+            }
 
-    th, td {
-      padding: 3px !important;
-      border: 1px solid black !important;
-      vertical-align: top !important;
-      font-size: 8.5pt !important;
-      word-wrap: break-word !important;
-      overflow-wrap: break-word !important;
-      white-space: normal !important;
-    }
+            /* Table styling for print */
+            table {
+              width: 100% !important;
+              border-collapse: collapse !important;
+              table-layout: fixed !important;
+              page-break-inside: auto;
+            }
 
-    /* Prevent table rows from breaking across pages when possible */
-    tr {
-      page-break-inside: avoid;
-      page-break-after: auto;
-    }
+            th,
+            td {
+              padding: 3px !important;
+              border: 1px solid black !important;
+              vertical-align: top !important;
+              font-size: 8.5pt !important;
+              word-wrap: break-word !important;
+              overflow-wrap: break-word !important;
+              white-space: normal !important;
+            }
 
-    /* Specific table column widths for better layout */
-    .unit-details-table th:nth-child(1),
-    .unit-details-table td:nth-child(1) {
-      width: 4% !important;
-    }
-    .unit-details-table th:nth-child(2),
-    .unit-details-table td:nth-child(2) {
-      width: 16% !important;
-    }
-    .unit-details-table th:nth-child(3),
-    .unit-details-table td:nth-child(3) {
-      width: 35% !important;
-    }
-    .unit-details-table th:nth-child(4),
-    .unit-details-table td:nth-child(4),
-    .unit-details-table th:nth-child(5),
-    .unit-details-table td:nth-child(5) {
-      width: 8% !important;
-    }
-    .unit-details-table th:nth-child(6),
-    .unit-details-table td:nth-child(6),
-    .unit-details-table th:nth-child(7),
-    .unit-details-table td:nth-child(7) {
-      width: 11% !important;
-    }
+            /* Prevent table rows from breaking across pages when possible */
+            tr {
+              page-break-inside: avoid;
+              page-break-after: auto;
+            }
 
-    /* Section spacing */
-    .mb-6 {
-      margin-bottom: 12pt !important;
-    }
+            /* Specific table column widths for better layout */
+            .unit-details-table th:nth-child(1),
+            .unit-details-table td:nth-child(1) {
+              width: 4% !important;
+            }
+            .unit-details-table th:nth-child(2),
+            .unit-details-table td:nth-child(2) {
+              width: 16% !important;
+            }
+            .unit-details-table th:nth-child(3),
+            .unit-details-table td:nth-child(3) {
+              width: 35% !important;
+            }
+            .unit-details-table th:nth-child(4),
+            .unit-details-table td:nth-child(4),
+            .unit-details-table th:nth-child(5),
+            .unit-details-table td:nth-child(5) {
+              width: 8% !important;
+            }
+            .unit-details-table th:nth-child(6),
+            .unit-details-table td:nth-child(6),
+            .unit-details-table th:nth-child(7),
+            .unit-details-table td:nth-child(7) {
+              width: 11% !important;
+            }
 
-    /* Header section */
-    .text-center {
-      text-align: center !important;
-    }
+            /* Section spacing */
+            .mb-6 {
+              margin-bottom: 12pt !important;
+            }
 
-    .text-xl {
-      font-size: 12pt !important;
-      font-weight: bold !important;
-    }
+            /* Header section */
+            .text-center {
+              text-align: center !important;
+            }
 
-    .text-lg {
-      font-size: 11pt !important;
-      font-weight: bold !important;
-    }
+            .text-xl {
+              font-size: 12pt !important;
+              font-weight: bold !important;
+            }
 
-    .text-md {
-      font-size: 10pt !important;
-      font-weight: 600 !important;
-    }
+            .text-lg {
+              font-size: 11pt !important;
+              font-weight: bold !important;
+            }
 
-    /* Ensure sections don't break awkwardly */
-    .units-section {
-      page-break-inside: avoid;
-    }
+            .text-md {
+              font-size: 10pt !important;
+              font-weight: 600 !important;
+            }
 
-    /* Digital signature at bottom */
-    .text-right {
-      text-align: right !important;
-      margin-top: 20pt !important;
-    }
+            /* Ensure sections don't break awkwardly */
+            .units-section {
+              page-break-inside: avoid;
+            }
 
-    /* Force page breaks before major sections if needed */
-    .section-break {
-      page-break-before: always;
-    }
-  }
-`}</style>
+            /* Digital signature at bottom */
+            .text-right {
+              text-align: right !important;
+              margin-top: 20pt !important;
+            }
+
+            /* Force page breaks before major sections if needed */
+            .section-break {
+              page-break-before: always;
+            }
+          }
+        `}</style>
 
         {/* Header Section */}
         <div className="text-center mb-8 space-y-1">
-          <h1 className="text-xl font-bold">Charotar University of Science and Technology (CHARUSAT)</h1>
-          <h2 className="text-xl font-bold">Devang Patel Institute of Advance Technology and Research (DEPSTAR)</h2>
-          <h3 className="text-xl font-bold">Department of {lessonPlan.subject.department.name}</h3>
+          <h1 className="text-xl font-bold">
+            Charotar University of Science and Technology (CHARUSAT)
+          </h1>
+          <h2 className="text-xl font-bold">
+            Devang Patel Institute of Advance Technology and Research (DEPSTAR)
+          </h2>
+          <h3 className="text-xl font-bold">
+            Department of {lessonPlan.subject.department.name}
+          </h3>
           <h4 className="text-xl font-bold">Lesson Planning Document</h4>
         </div>
 
@@ -239,7 +267,8 @@ export default function PrintLessonPlanPage() {
                   Department:
                 </td>
                 <td className="border border-black p-2 break-words overflow-hidden text-ellipsis max-w-0 w-[25%]">
-                  {lessonPlan.subject.department.name} ({lessonPlan.subject.department.abbreviation_depart})
+                  {lessonPlan.subject.department.name} (
+                  {lessonPlan.subject.department.abbreviation_depart})
                 </td>
               </tr>
               <tr>
@@ -259,7 +288,8 @@ export default function PrintLessonPlanPage() {
                   Term Duration:
                 </td>
                 <td className="border border-black p-2 break-words overflow-hidden text-ellipsis max-w-0">
-                  {formatDate(lessonPlan.term_start_date)} to {formatDate(lessonPlan.term_end_date)}
+                  {formatDate(lessonPlan.term_start_date)} to{" "}
+                  {formatDate(lessonPlan.term_end_date)}
                 </td>
               </tr>
               <tr>
@@ -272,10 +302,10 @@ export default function PrintLessonPlanPage() {
                     {lessonPlan.subject.semester === 1
                       ? "st"
                       : lessonPlan.subject.semester === 2
-                        ? "nd"
-                        : lessonPlan.subject.semester === 3
-                          ? "rd"
-                          : "th"}
+                      ? "nd"
+                      : lessonPlan.subject.semester === 3
+                      ? "rd"
+                      : "th"}
                   </sup>{" "}
                   semester
                 </td>
@@ -316,7 +346,10 @@ export default function PrintLessonPlanPage() {
                 <td className="border border-black p-2 font-bold break-words overflow-hidden text-ellipsis max-w-0">
                   Course Prerequisites:
                 </td>
-                <td className="border border-black p-2 break-words overflow-hidden text-ellipsis max-w-0" colSpan={5}>
+                <td
+                  className="border border-black p-2 break-words overflow-hidden text-ellipsis max-w-0"
+                  colSpan={5}
+                >
                   {lessonPlan.course_prerequisites || "N/A"}
                 </td>
               </tr>
@@ -324,7 +357,10 @@ export default function PrintLessonPlanPage() {
                 <td className="border border-black p-2 font-bold break-words overflow-hidden text-ellipsis max-w-0">
                   Course Prerequisites Materials:
                 </td>
-                <td className="border border-black p-2 break-words overflow-hidden text-ellipsis max-w-0" colSpan={5}>
+                <td
+                  className="border border-black p-2 break-words overflow-hidden text-ellipsis max-w-0"
+                  colSpan={5}
+                >
                   {lessonPlan.course_prerequisites_materials || "N/A"}
                 </td>
               </tr>
@@ -335,7 +371,9 @@ export default function PrintLessonPlanPage() {
         {/* 2. UNIT DETAILS */}
         <div className="mb-6 units-section">
           <h2 className="text-lg font-bold mb-2">2. UNIT DETAILS</h2>
-          <h3 className="text-md font-semibold mb-2">2.1 Basic Units Information</h3>
+          <h3 className="text-md font-semibold mb-2">
+            2.1 Basic Units Information
+          </h3>
           <table className="w-full border-collapse table-fixed">
             <thead>
               <tr>
@@ -439,7 +477,9 @@ export default function PrintLessonPlanPage() {
         </div>
 
         <div className="mb-6">
-          <h3 className="text-md font-semibold mb-2">2.3 Other Units Content</h3>
+          <h3 className="text-md font-semibold mb-2">
+            2.3 Other Units Content
+          </h3>
           <table className="w-full border-collapse table-fixed">
             <thead>
               <tr>
@@ -489,7 +529,9 @@ export default function PrintLessonPlanPage() {
           <h2 className="text-lg font-bold mb-2">3. PRACTICAL DETAILS</h2>
           {lessonPlan.practicals && lessonPlan.practicals.length > 0 && (
             <div className="mb-6">
-              <h3 className="text-md font-semibold mb-2">3.1 Basic Practical Information</h3>
+              <h3 className="text-md font-semibold mb-2">
+                3.1 Basic Practical Information
+              </h3>
               <table className="w-full border-collapse table-fixed mb-4">
                 <thead>
                   <tr>
@@ -514,34 +556,40 @@ export default function PrintLessonPlanPage() {
                   </tr>
                 </thead>
                 <tbody>
-                  {lessonPlan.practicals.map((practical: any, index: number) => (
-                    <tr key={index}>
-                      <td className="border border-black p-2 text-center break-words overflow-hidden text-ellipsis max-w-0 text-sm">
-                        {index + 1}
-                      </td>
-                      <td className="border border-black p-2 text-center break-words overflow-hidden text-ellipsis max-w-0 text-sm">
-                        {practical.faculty_name}
-                      </td>
-                      <td className="border border-black p-2 text-center break-words overflow-hidden text-ellipsis max-w-0 text-sm">
-                        {practical.lab_hours}
-                      </td>
-                      <td className="border border-black p-2 text-center break-words overflow-hidden text-ellipsis max-w-0 text-sm">
-                        {practical.probable_week}
-                      </td>
-                      <td className="border border-black p-2 text-center break-words overflow-hidden text-ellipsis max-w-0 text-sm">
-                        {Array.isArray(practical.co_mapping) ? practical.co_mapping.join(", ") : practical.co_mapping}
-                      </td>
-                      <td className="border border-black p-2 text-center break-words overflow-hidden text-ellipsis max-w-0 text-sm">
-                        {Array.isArray(practical.pso_mapping)
-                          ? practical.pso_mapping.join(", ")
-                          : practical.pso_mapping}
-                      </td>
-                    </tr>
-                  ))}
+                  {lessonPlan.practicals.map(
+                    (practical: any, index: number) => (
+                      <tr key={index}>
+                        <td className="border border-black p-2 text-center break-words overflow-hidden text-ellipsis max-w-0 text-sm">
+                          {index + 1}
+                        </td>
+                        <td className="border border-black p-2 text-center break-words overflow-hidden text-ellipsis max-w-0 text-sm">
+                          {practical.faculty_name}
+                        </td>
+                        <td className="border border-black p-2 text-center break-words overflow-hidden text-ellipsis max-w-0 text-sm">
+                          {practical.lab_hours}
+                        </td>
+                        <td className="border border-black p-2 text-center break-words overflow-hidden text-ellipsis max-w-0 text-sm">
+                          {practical.probable_week}
+                        </td>
+                        <td className="border border-black p-2 text-center break-words overflow-hidden text-ellipsis max-w-0 text-sm">
+                          {Array.isArray(practical.co_mapping)
+                            ? practical.co_mapping.join(", ")
+                            : practical.co_mapping}
+                        </td>
+                        <td className="border border-black p-2 text-center break-words overflow-hidden text-ellipsis max-w-0 text-sm">
+                          {Array.isArray(practical.pso_mapping)
+                            ? practical.pso_mapping.join(", ")
+                            : practical.pso_mapping}
+                        </td>
+                      </tr>
+                    )
+                  )}
                 </tbody>
               </table>
 
-              <h3 className="text-md font-semibold mb-2">3.2 Practical Content</h3>
+              <h3 className="text-md font-semibold mb-2">
+                3.2 Practical Content
+              </h3>
               <table className="w-full border-collapse table-fixed mb-4">
                 <thead>
                   <tr>
@@ -563,31 +611,35 @@ export default function PrintLessonPlanPage() {
                   </tr>
                 </thead>
                 <tbody>
-                  {lessonPlan.practicals.map((practical: any, index: number) => (
-                    <tr key={index}>
-                      <td className="border border-black p-2 text-center break-words overflow-hidden text-ellipsis max-w-0 text-sm">
-                        {index + 1}
-                      </td>
-                      <td className="border border-black p-2 text-center break-words whitespace-normal text-sm">
-                        {practical.practical_aim}
-                      </td>
-                      <td className="border border-black p-2 text-center break-words whitespace-normal text-sm">
-                        {practical.practical_tasks}
-                      </td>
-                      <td className="border border-black p-2 text-center break-words whitespace-normal text-sm">
-                        {practical.practical_pedagogy}
-                      </td>
-                      <td className="border border-black p-2 text-center break-words whitespace-normal text-sm">
-                        {Array.isArray(practical.evaluation_methods)
-                          ? practical.evaluation_methods.join(", ")
-                          : practical.evaluation_methods}
-                      </td>
-                    </tr>
-                  ))}
+                  {lessonPlan.practicals.map(
+                    (practical: any, index: number) => (
+                      <tr key={index}>
+                        <td className="border border-black p-2 text-center break-words overflow-hidden text-ellipsis max-w-0 text-sm">
+                          {index + 1}
+                        </td>
+                        <td className="border border-black p-2 text-center break-words whitespace-normal text-sm">
+                          {practical.practical_aim}
+                        </td>
+                        <td className="border border-black p-2 text-center break-words whitespace-normal text-sm">
+                          {practical.practical_tasks}
+                        </td>
+                        <td className="border border-black p-2 text-center break-words whitespace-normal text-sm">
+                          {practical.practical_pedagogy}
+                        </td>
+                        <td className="border border-black p-2 text-center break-words whitespace-normal text-sm">
+                          {Array.isArray(practical.evaluation_methods)
+                            ? practical.evaluation_methods.join(", ")
+                            : practical.evaluation_methods}
+                        </td>
+                      </tr>
+                    )
+                  )}
                 </tbody>
               </table>
 
-              <h3 className="text-md font-semibold mb-2">3.3 Additional Practical Information</h3>
+              <h3 className="text-md font-semibold mb-2">
+                3.3 Additional Practical Information
+              </h3>
               <table className="w-full border-collapse table-fixed">
                 <thead>
                   <tr>
@@ -615,37 +667,39 @@ export default function PrintLessonPlanPage() {
                   </tr>
                 </thead>
                 <tbody>
-                  {lessonPlan.practicals.map((practical: any, index: number) => (
-                    <tr key={index}>
-                      <td className="border border-black p-2 text-center break-words overflow-hidden text-ellipsis max-w-0 text-sm">
-                        {index + 1}
-                      </td>
-                      <td className="border border-black p-2 text-center break-words overflow-hidden text-ellipsis max-w-0 text-sm">
-                        {Array.isArray(practical.associated_units)
-                          ? practical.associated_units.join(", ")
-                          : practical.associated_units}
-                      </td>
-                      <td className="border border-black p-2 text-center break-words overflow-hidden text-ellipsis max-w-0 text-sm">
-                        {Array.isArray(practical.blooms_taxonomy)
-                          ? practical.blooms_taxonomy.join(", ")
-                          : practical.blooms_taxonomy}
-                      </td>
-                      <td className="border border-black p-2 text-center break-words overflow-hidden text-ellipsis max-w-0 text-sm">
-                        {Array.isArray(practical.skill_mapping)
-                          ? practical.skill_mapping.join(", ")
-                          : practical.skill_mapping}
-                      </td>
-                      <td className="border border-black p-2 text-center break-words whitespace-normal text-sm">
-                        {practical.skill_objectives}
-                      </td>
-                      <td className="border border-black p-2 text-center break-words whitespace-normal text-sm">
-                        {practical.reference_material}
-                      </td>
-                      <td className="border border-black p-2 text-center break-words whitespace-normal text-sm">
-                        {practical.software_hardware_requirements}
-                      </td>
-                    </tr>
-                  ))}
+                  {lessonPlan.practicals.map(
+                    (practical: any, index: number) => (
+                      <tr key={index}>
+                        <td className="border border-black p-2 text-center break-words overflow-hidden text-ellipsis max-w-0 text-sm">
+                          {index + 1}
+                        </td>
+                        <td className="border border-black p-2 text-center break-words overflow-hidden text-ellipsis max-w-0 text-sm">
+                          {Array.isArray(practical.associated_units)
+                            ? practical.associated_units.join(", ")
+                            : practical.associated_units}
+                        </td>
+                        <td className="border border-black p-2 text-center break-words overflow-hidden text-ellipsis max-w-0 text-sm">
+                          {Array.isArray(practical.blooms_taxonomy)
+                            ? practical.blooms_taxonomy.join(", ")
+                            : practical.blooms_taxonomy}
+                        </td>
+                        <td className="border border-black p-2 text-center break-words overflow-hidden text-ellipsis max-w-0 text-sm">
+                          {Array.isArray(practical.skill_mapping)
+                            ? practical.skill_mapping.join(", ")
+                            : practical.skill_mapping}
+                        </td>
+                        <td className="border border-black p-2 text-center break-words whitespace-normal text-sm">
+                          {practical.skill_objectives}
+                        </td>
+                        <td className="border border-black p-2 text-center break-words whitespace-normal text-sm">
+                          {practical.reference_material}
+                        </td>
+                        <td className="border border-black p-2 text-center break-words whitespace-normal text-sm">
+                          {practical.software_hardware_requirements}
+                        </td>
+                      </tr>
+                    )
+                  )}
                 </tbody>
               </table>
             </div>
@@ -718,110 +772,111 @@ export default function PrintLessonPlanPage() {
         {/* 5. ADDITIONAL DETAILS */}
         <div className="mb-6">
           <h2 className="text-lg font-bold mb-2">5. ADDITIONAL DETAILS</h2>
-          {lessonPlan.additional_info && Object.keys(lessonPlan.additional_info).length > 0 && (
-            <div className="mb-6">
-              <table className="w-full border-collapse">
-                <tbody>
-                  {lessonPlan.additional_info.academic_integrity && (
-                    <tr>
-                      <td
-                        className="border border-black p-3 font-bold bg-gray-50 align-top"
-                        style={{ width: "250px", minWidth: "250px" }}
-                      >
-                        Academic Integrity:
-                      </td>
-                      <td
-                        className="border border-black p-3 align-top"
-                        style={{
-                          wordBreak: "break-word",
-                          whiteSpace: "pre-wrap",
-                        }}
-                      >
-                        {lessonPlan.additional_info.academic_integrity}
-                      </td>
-                    </tr>
-                  )}
-                  {lessonPlan.additional_info.attendance_policy && (
-                    <tr>
-                      <td
-                        className="border border-black p-3 font-bold bg-gray-50 align-top"
-                        style={{ width: "250px", minWidth: "250px" }}
-                      >
-                        Attendance Policy:
-                      </td>
-                      <td
-                        className="border border-black p-3 align-top"
-                        style={{
-                          wordBreak: "break-word",
-                          whiteSpace: "pre-wrap",
-                        }}
-                      >
-                        {lessonPlan.additional_info.attendance_policy}
-                      </td>
-                    </tr>
-                  )}
-                  {lessonPlan.additional_info.cie_guidelines && (
-                    <tr>
-                      <td
-                        className="border border-black p-3 font-bold bg-gray-50 align-top"
-                        style={{ width: "250px", minWidth: "250px" }}
-                      >
-                        CIE Guidelines:
-                      </td>
-                      <td
-                        className="border border-black p-3 align-top"
-                        style={{
-                          wordBreak: "break-word",
-                          whiteSpace: "pre-wrap",
-                        }}
-                      >
-                        {lessonPlan.additional_info.cie_guidelines}
-                      </td>
-                    </tr>
-                  )}
-                  {lessonPlan.additional_info.classroom_conduct && (
-                    <tr>
-                      <td
-                        className="border border-black p-3 font-bold bg-gray-50 align-top"
-                        style={{ width: "250px", minWidth: "250px" }}
-                      >
-                        Classroom Conduct:
-                      </td>
-                      <td
-                        className="border border-black p-3 align-top"
-                        style={{
-                          wordBreak: "break-word",
-                          whiteSpace: "pre-wrap",
-                        }}
-                      >
-                        {lessonPlan.additional_info.classroom_conduct}
-                      </td>
-                    </tr>
-                  )}
-                  {lessonPlan.additional_info.communication_channels && (
-                    <tr>
-                      <td
-                        className="border border-black p-3 font-bold bg-gray-50 align-top"
-                        style={{ width: "250px", minWidth: "250px" }}
-                      >
-                        Communication Channels:
-                      </td>
-                      <td
-                        className="border border-black p-3 align-top"
-                        style={{
-                          wordBreak: "break-word",
-                          whiteSpace: "pre-wrap",
-                        }}
-                      >
-                        {lessonPlan.additional_info.communication_channels}
-                      </td>
-                    </tr>
-                  )}
-                  {/* Add any other additional info fields here */}
-                </tbody>
-              </table>
-            </div>
-          )}
+          {lessonPlan.additional_info &&
+            Object.keys(lessonPlan.additional_info).length > 0 && (
+              <div className="mb-6">
+                <table className="w-full border-collapse">
+                  <tbody>
+                    {lessonPlan.additional_info.academic_integrity && (
+                      <tr>
+                        <td
+                          className="border border-black p-3 font-bold bg-gray-50 align-top"
+                          style={{ width: "250px", minWidth: "250px" }}
+                        >
+                          Academic Integrity:
+                        </td>
+                        <td
+                          className="border border-black p-3 align-top"
+                          style={{
+                            wordBreak: "break-word",
+                            whiteSpace: "pre-wrap",
+                          }}
+                        >
+                          {lessonPlan.additional_info.academic_integrity}
+                        </td>
+                      </tr>
+                    )}
+                    {lessonPlan.additional_info.attendance_policy && (
+                      <tr>
+                        <td
+                          className="border border-black p-3 font-bold bg-gray-50 align-top"
+                          style={{ width: "250px", minWidth: "250px" }}
+                        >
+                          Attendance Policy:
+                        </td>
+                        <td
+                          className="border border-black p-3 align-top"
+                          style={{
+                            wordBreak: "break-word",
+                            whiteSpace: "pre-wrap",
+                          }}
+                        >
+                          {lessonPlan.additional_info.attendance_policy}
+                        </td>
+                      </tr>
+                    )}
+                    {lessonPlan.additional_info.cie_guidelines && (
+                      <tr>
+                        <td
+                          className="border border-black p-3 font-bold bg-gray-50 align-top"
+                          style={{ width: "250px", minWidth: "250px" }}
+                        >
+                          CIE Guidelines:
+                        </td>
+                        <td
+                          className="border border-black p-3 align-top"
+                          style={{
+                            wordBreak: "break-word",
+                            whiteSpace: "pre-wrap",
+                          }}
+                        >
+                          {lessonPlan.additional_info.cie_guidelines}
+                        </td>
+                      </tr>
+                    )}
+                    {lessonPlan.additional_info.classroom_conduct && (
+                      <tr>
+                        <td
+                          className="border border-black p-3 font-bold bg-gray-50 align-top"
+                          style={{ width: "250px", minWidth: "250px" }}
+                        >
+                          Classroom Conduct:
+                        </td>
+                        <td
+                          className="border border-black p-3 align-top"
+                          style={{
+                            wordBreak: "break-word",
+                            whiteSpace: "pre-wrap",
+                          }}
+                        >
+                          {lessonPlan.additional_info.classroom_conduct}
+                        </td>
+                      </tr>
+                    )}
+                    {lessonPlan.additional_info.communication_channels && (
+                      <tr>
+                        <td
+                          className="border border-black p-3 font-bold bg-gray-50 align-top"
+                          style={{ width: "250px", minWidth: "250px" }}
+                        >
+                          Communication Channels:
+                        </td>
+                        <td
+                          className="border border-black p-3 align-top"
+                          style={{
+                            wordBreak: "break-word",
+                            whiteSpace: "pre-wrap",
+                          }}
+                        >
+                          {lessonPlan.additional_info.communication_channels}
+                        </td>
+                      </tr>
+                    )}
+                    {/* Add any other additional info fields here */}
+                  </tbody>
+                </table>
+              </div>
+            )}
         </div>
 
         {/* 6. SHARING */}
@@ -872,5 +927,5 @@ export default function PrintLessonPlanPage() {
         </p>
       </div>
     </>
-  )
+  );
 }

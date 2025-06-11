@@ -22,7 +22,7 @@ function ViewLessonPlanPage() {
         if (result.success) {
           setLessonPlan(result.data);
         } else {
-          toast.error(result.error || "Failed to load lesson plan");
+          toast.error(result.error || "Failed to load lesson plan !!");
         }
       } catch (error) {
         console.error("Error loading lesson plan:", error);
@@ -59,11 +59,14 @@ function ViewLessonPlanPage() {
     );
   }
 
-  // Helper function to format date
   const formatDate = (dateString: string) => {
-    if (!dateString) return "N/A";
-    return new Date(dateString).toLocaleDateString();
-  };
+    if (!dateString) return "N/A"
+    const date = new Date(dateString)
+    const day = String(date.getDate()).padStart(2, "0")
+    const month = String(date.getMonth() + 1).padStart(2, "0")
+    const year = date.getFullYear()
+    return `${day}/${month}/${year}`
+  }
 
   return (
     <div className="w-full p-5 bg-white text-black font-sans overflow-hidden">
@@ -237,13 +240,13 @@ function ViewLessonPlanPage() {
                   <th className="border border-black p-2 font-bold text-center break-words overflow-hidden text-ellipsis max-w-0 w-[16%]">
                     Unit Name
                   </th>
-                  <th className="border border-black p-2 font-bold text-center break-words overflow-hidden text-ellipsis max-w-0 w-[51%]">
+                  <th className="border border-black p-2 font-bold text-center break-words overflow-hidden text-ellipsis max-w-0 w-[48%]">
                     Unit Topics
                   </th>
-                  <th className="border border-black p-2 font-bold text-center break-words overflow-hidden text-ellipsis max-w-0 w-[8%]">
+                  <th className="border border-black p-2 font-bold text-center break-words overflow-hidden text-ellipsis max-w-0 w-[9%]">
                     Start Date
                   </th>
-                  <th className="border border-black p-2 font-bold text-center break-words overflow-hidden text-ellipsis max-w-0 w-[7%]">
+                  <th className="border border-black p-2 font-bold text-center break-words overflow-hidden text-ellipsis max-w-0 w-[9%]">
                     End Date
                   </th>
                   <th className="border border-black p-2 font-bold text-center break-words overflow-hidden text-ellipsis max-w-0 w-[11%]">

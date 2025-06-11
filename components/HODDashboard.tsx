@@ -204,8 +204,6 @@ export default function HODDashboard() {
   const [selectedSubject, setSelectedSubject] = useState<Subjects | null>(null);
   const [isDeletingFaculty, setIsDeletingFaculty] = useState(false);
   const [isDeletingSubject, setIsDeletingSubject] = useState(false);
-  const [showPsoPeoInDialog, setShowPsoPeoInDialog] = useState(false);
-  const [psoPeoDialogOpen, setPsoPeoDialogOpen] = useState(false);
   const [psoItems, setPsoItems] = useState<PSOPEOItem[]>([
     { id: "1", label: "PSO1", value: "", type: "PSO" },
     { id: "2", label: "PSO2", value: "", type: "PSO" },
@@ -352,8 +350,6 @@ export default function HODDashboard() {
     console.log("PEO Items:", peoItems);
 
     toast("PSO/PEO data saved successfully");
-    setPsoPeoDialogOpen(false);
-    setShowPsoPeoInDialog(false);
     setSubjectDialogOpen(false);
 
     // Reset the form data
@@ -569,6 +565,7 @@ export default function HODDashboard() {
         );
         setFaculty(departFaculty);
       } else {
+        console.log(result);
         toast.error("Failed to delete subject");
       }
     } catch (error) {
@@ -599,6 +596,7 @@ export default function HODDashboard() {
       const result = await addSubject(formData);
       if (result.success) {
         toast.success("Subject added successfully...");
+        setSubjectDialogOpen(false);
         subjectForm.reset({
           departmentId: currentRole.depart_id,
           semester: 1,
@@ -616,9 +614,6 @@ export default function HODDashboard() {
           (subject) => subject.department_id === currentRole.depart_id
         );
         setSubjects(departSubjects);
-
-        // Show PSO/PEO button in dialog after successful subject addition
-        setShowPsoPeoInDialog(true);
       } else {
         toast.error("Failed to add subject");
       }
@@ -691,7 +686,7 @@ export default function HODDashboard() {
   }
 
   return (
-    <div className="pt-3 px-5">
+    <div className="px-5 py-3">
       <div className="flex justify-between items-center px-5 py-3 border-2 rounded-lg">
         <p className="text-[#1A5CA1] font-manrope font-bold text-[25px] leading-[25px]">
           {currentRole.role_name} Dashboard
@@ -772,7 +767,7 @@ export default function HODDashboard() {
                         </div>
                       </Button>
                     </DialogTrigger>
-                    <DialogContent className="sm:max-w-[500px]">
+                    <DialogContent className="sm:max-w-[500px] px-5">
                       <DialogHeader>
                         <DialogTitle className="text-[#1A5CA1] font-manrope font-bold text-[22px] leading-[25px] mb-3">
                           Add New Faculty
@@ -1236,12 +1231,10 @@ export default function HODDashboard() {
                                   variant="outline"
                                   onClick={() => {
                                     setSubjectDialogOpen(false);
-                                    setShowPsoPeoInDialog(false);
                                   }}
                                 >
                                   Cancel
                                 </Button>
-                                {!showPsoPeoInDialog ? (
                                   <Button
                                     type="submit"
                                     disabled={isAddingSubject}
@@ -1250,168 +1243,10 @@ export default function HODDashboard() {
                                       ? "Adding..."
                                       : "Add Subject"}
                                   </Button>
-                                ) : (
-                                  <Button
-                                    type="button"
-                                    onClick={() => setPsoPeoDialogOpen(true)}
-                                  >
-                                    Add PSO/PEO
-                                  </Button>
-                                )}
                               </div>
                             </DialogFooter>
                           </form>
                         </Form>
-                      </DialogContent>
-                    </Dialog>
-
-                    {/* PSO/PEO Dialog */}
-                    <Dialog
-                      open={psoPeoDialogOpen}
-                      onOpenChange={setPsoPeoDialogOpen}
-                    >
-                      <DialogContent className="sm:max-w-[600px] max-h-[80vh] overflow-y-auto">
-                        <DialogHeader>
-                          <DialogTitle className="text-[#1A5CA1] font-manrope font-bold text-[22px] leading-[25px] mb-3">
-                            Add PSO/PEO
-                          </DialogTitle>
-                        </DialogHeader>
-
-                        <div className="space-y-6">
-                          {/* PSO Section */}
-                          <div className="space-y-4">
-                            <div className="flex items-center justify-between">
-                              <h3 className="text-lg font-semibold">
-                                Program Specific Outcome
-                              </h3>
-                              <Button
-                                type="button"
-                                variant="outline"
-                                size="sm"
-                                onClick={addPsoItem}
-                                className="flex items-center gap-1"
-                              >
-                                <Plus className="w-4 h-4" />
-                              </Button>
-                            </div>
-
-                            {psoItems.map((item) => (
-                              <div
-                                key={item.id}
-                                className="flex items-center gap-2"
-                              >
-                                <Input
-                                  value={item.label}
-                                  onChange={(e) =>
-                                    updatePsoItem(
-                                      item.id,
-                                      "label",
-                                      e.target.value
-                                    )
-                                  }
-                                  className="w-20"
-                                  placeholder="PSO1"
-                                />
-                                <Input
-                                  value={item.value}
-                                  onChange={(e) =>
-                                    updatePsoItem(
-                                      item.id,
-                                      "value",
-                                      e.target.value
-                                    )
-                                  }
-                                  className="flex-1"
-                                  placeholder="Enter PSO description"
-                                />
-                                <Button
-                                  type="button"
-                                  variant="outline"
-                                  size="sm"
-                                  onClick={() => deletePsoItem(item.id)}
-                                  disabled={psoItems.length <= 1}
-                                  className="bg-red-600 hover:bg-red-700 text-white hover:text-white"
-                                >
-                                  <Trash className="w-4 h-4" />
-                                </Button>
-                              </div>
-                            ))}
-                          </div>
-
-                          {/* PEO Section */}
-                          <div className="space-y-4">
-                            <div className="flex items-center justify-between">
-                              <h3 className="text-lg font-semibold">
-                                Program Educational Objective
-                              </h3>
-                              <Button
-                                type="button"
-                                variant="outline"
-                                size="sm"
-                                onClick={addPeoItem}
-                                className="flex items-center gap-1"
-                              >
-                                <Plus className="w-4 h-4" />
-                              </Button>
-                            </div>
-
-                            {peoItems.map((item) => (
-                              <div
-                                key={item.id}
-                                className="flex items-center gap-2"
-                              >
-                                <Input
-                                  value={item.label}
-                                  onChange={(e) =>
-                                    updatePeoItem(
-                                      item.id,
-                                      "label",
-                                      e.target.value
-                                    )
-                                  }
-                                  className="w-20"
-                                  placeholder="PEO1"
-                                />
-                                <Input
-                                  value={item.value}
-                                  onChange={(e) =>
-                                    updatePeoItem(
-                                      item.id,
-                                      "value",
-                                      e.target.value
-                                    )
-                                  }
-                                  className="flex-1"
-                                  placeholder="Enter PEO description"
-                                />
-                                <Button
-                                  type="button"
-                                  variant="outline"
-                                  size="sm"
-                                  onClick={() => deletePeoItem(item.id)}
-                                  disabled={peoItems.length <= 1}
-                                  className="bg-red-600 hover:bg-red-700 text-white hover:text-white"
-                                >
-                                  <Trash className="w-4 h-4" />
-                                </Button>
-                              </div>
-                            ))}
-                          </div>
-                        </div>
-                        <DialogFooter className="mt-6">
-                          <div className="flex justify-between w-full">
-                            <Button
-                              type="button"
-                              variant="outline"
-                              onClick={() => setPsoPeoDialogOpen(false)}
-                            >
-                              Back to Subject
-                            </Button>
-                            <Button type="button" onClick={handlePsoPeoSubmit}>
-                              Submit PSO/PEO
-                            </Button>
-                          </div>
-                        </DialogFooter>
                       </DialogContent>
                     </Dialog>
                   </div>
