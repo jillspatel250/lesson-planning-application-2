@@ -1,3 +1,5 @@
+//@ts-nocheck
+
 //@ts-ignore
 "use client"
 
@@ -159,12 +161,12 @@ export default function EditLessonPlanPage() {
             </span>
           )}
         </div>
-        <div className="flex items-center gap-2">
+        {/* <div className="flex items-center gap-2">
           <Button onClick={handleSave} disabled={isSaving} className="bg-[#1A5CA1] hover:bg-[#154A80]">
             <Save className="mr-2 h-4 w-4" />
             {isSaving ? "Saving..." : "Save"}
           </Button>
-        </div>
+        </div> */}
       </div>
 
       <Card className="mb-6">

@@ -321,19 +321,18 @@ export default function PsoPeoManagementModal({ isOpen, onClose }: PsoPeoManagem
             </div>
           </div>
         </div>
-
         <DialogFooter className="flex justify-between">
-          <div className="flex justify-between w-full">
-          <Button variant="outline" onClick={onClose}>
-            Cancel
-          </Button>
-          <Button onClick={savePsoPeoData} disabled={saving} className="bg-[#1A5CA1] hover:bg-[#1A5CA1]/90">
-            {saving && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-            Save PSO/PEO for All Subjects
-          </Button>
-          </div>
-        </DialogFooter>
+  <Button variant="outline" onClick={onClose}>
+    Cancel
+  </Button>
+  <Button onClick={savePsoPeoData} disabled={saving} className="bg-[#1A5CA1] hover:bg-[#1A5CA1]/90">
+    {saving && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+    Save PSO/PEO for All Subjects
+  </Button>
+</DialogFooter>
       </DialogContent>
     </Dialog>
   )
 }
+
+   

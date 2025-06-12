@@ -1,3 +1,4 @@
+
 // import { z } from "zod"
 
 // // General Details Form Schema
@@ -10,14 +11,8 @@
 //   lecture_hours: z.coerce.number().min(1, "Lecture hours must be at least 1"),
 //   lab_hours: z.coerce.number().min(0, "Lab hours cannot be negative"),
 //   credits: z.coerce.number().min(1, "Credits must be at least 1"),
-//   term_start_date: z.date({
-//     required_error: "Term start date is required",
-//     invalid_type_error: "Term start date must be a valid date",
-//   }),
-//   term_end_date: z.date({
-//     required_error: "Term end date is required",
-//     invalid_type_error: "Term end date must be a valid date",
-//   }),
+//   term_start_date: z.string().min(1, "Term start date is required"),
+//   term_end_date: z.string().min(1, "Term end date is required"),
 //   course_prerequisites: z.string().min(1, "Course prerequisites are required"),
 //   course_prerequisites_materials: z.string().min(1, "Course prerequisites materials are required"),
 //   courseOutcomes: z
@@ -43,14 +38,8 @@
 //         id: z.string(),
 //         unit_name: z.string().min(1, "Unit name is required"),
 //         unit_topics: z.string().min(1, "Unit topics are required"),
-//         probable_start_date: z.date({
-//           required_error: "Probable start date is required",
-//           invalid_type_error: "Probable start date must be a valid date",
-//         }),
-//         probable_end_date: z.date({
-//           required_error: "Probable end date is required",
-//           invalid_type_error: "Probable end date must be a valid date",
-//         }),
+//         probable_start_date: z.string().min(1, "Probable start date is required"),
+//         probable_end_date: z.string().min(1, "Probable end date is required"),
 //         no_of_lectures: z.coerce.number().min(1, "Number of lectures must be at least 1"),
 //         self_study_topics: z.string().optional(),
 //         self_study_materials: z.string().optional(),
@@ -129,10 +118,7 @@
 //         ]),
 //         units_covered: z.array(z.string()).optional(),
 //         practicals_covered: z.array(z.string()).optional(),
-//         date: z.date({
-//           required_error: "Date is required",
-//           invalid_type_error: "Date must be a valid date",
-//         }),
+//         date: z.string().min(1, "Date is required"),
 //         marks: z.coerce.number().min(1, "Marks must be at least 1"),
 //         duration: z.coerce.number().min(1, "Duration must be at least 1 minute"),
 //         blooms_taxonomy: z.array(z.string()).min(1, "At least one Bloom's taxonomy level must be selected"),
@@ -373,23 +359,6 @@
 // // PEO Options (Program Educational Objectives)
 // export const peoOptions = ["PEO1", "PEO2", "PEO3", "PEO4", "PEO5"]
 
-// // Date utility functions
-// export function formatDateForDisplay(date: Date): string {
-//   const day = date.getDate().toString().padStart(2, "0")
-//   const month = (date.getMonth() + 1).toString().padStart(2, "0")
-//   const year = date.getFullYear()
-//   return `${day}/${month}/${year}`
-// }
-
-// export function parseISODate(dateString: string): Date | null {
-//   if (!dateString) return null
-//   try {
-//     return new Date(dateString)
-//   } catch (error) {
-//     console.error("Error parsing date:", error)
-//     return null
-//   }
-// }
 
 import { z } from "zod"
 
@@ -636,8 +605,29 @@ export const saveAdditionalInfoSchema = z.object({
   formData: additionalInfoSchema,
 })
 
-// Teaching Pedagogy Options
-export const teachingPedagogyOptions = [
+// Update the teachingPedagogyOptions array:
+export const teachingPedagogyOptions = {
+  traditional: ["Chalk and Talk", "ICT based learning"],
+  alternative: [
+    "Active Learning",
+    "Blended Learning",
+    "Concept/Mind Mapping",
+    "Demonstration/Simulation-Based Learning",
+    "Experiential Learning",
+    "Flipped Classroom",
+    "Collaborative Learning",
+    "Peer Learning",
+    "Problem-Based Learning",
+    "Project-Based Learning",
+    "Reflective Learning",
+    "Role Play",
+    "Storytelling/Narrative Pedagogy",
+  ],
+  other: ["Other"],
+}
+
+// Keep the flat array for backward compatibility
+export const teachingPedagogyOptionsFlat = [
   "Chalk and Talk",
   "ICT based learning",
   "Active Learning",

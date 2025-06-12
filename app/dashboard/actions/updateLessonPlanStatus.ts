@@ -32,75 +32,27 @@
 //     }
 //   }
 // }
-
 "use server"
 
 import { createClient } from "@/utils/supabase/server"
-import { revalidatePath } from "next/cache"
 
-export async function updateLessonPlanStatus(lessonPlanId: string, status: string) {
+export async function updateLessonPlanStatus(facultyId: string, subjectId: string, status: string) {
   try {
+    console.log(`🔄 Updating lesson plan status for faculty: ${facultyId}, subject: ${subjectId} to ${status}`)
+
     const supabase = await createClient()
 
-    // Get the authenticated user
-    const {
-      data: { user },
-      error: authError,
-    } = await supabase.auth.getUser()
+    // Update the status in the user_role table
+    const { error } = await supabase.from("user_role").update({ status: status.toLowerCase() }).eq("id", facultyId)
 
-    if (authError || !user) {
-      throw new Error("Authentication required")
+    if (error) {
+      console.error("Error updating status:", error)
+      return { success: false, error: error.message }
     }
 
-    // Find the user record in the users table
-    const { data: userData, error: userError } = await supabase
-      .from("users")
-      .select("id, name, email")
-      .eq("auth_id", user.id)
-      .single()
-
-    if (userError || !userData) {
-      throw new Error("User not found in database")
-    }
-
-    // Update the status in user_role table (which acts as lesson plans)
-    const { error: updateError } = await supabase
-      .from("user_role")
-      .update({
-        status: status,
-        updated_at: new Date().toISOString(),
-      })
-      .eq("id", lessonPlanId)
-      .eq("user_id", userData.id)
-
-    if (updateError) {
-      console.error("Error updating lesson plan status:", updateError)
-      throw new Error("Failed to update lesson plan status")
-    }
-
-    // Also update lesson_plans table if it exists
-    const { data: assignment } = await supabase.from("user_role").select("subject_id").eq("id", lessonPlanId).single()
-
-    if (assignment) {
-      await supabase.from("lesson_plans").upsert({
-        faculty_id: userData.id,
-        subject_id: assignment.subject_id,
-        status: status,
-        updated_at: new Date().toISOString(),
-      })
-    }
-
-    revalidatePath("/dashboard/lesson-plans")
-
-    return {
-      success: true,
-      message: `Lesson plan status updated to ${status}`,
-    }
+    return { success: true }
   } catch (error) {
-    console.error("Error updating lesson plan status:", error)
-    return {
-      success: false,
-      error: error instanceof Error ? error.message : "Failed to update status",
-    }
+    console.error("Error in updateLessonPlanStatus:", error)
+    return { success: false, error: String(error) }
   }
 }

@@ -1,4 +1,5 @@
 //@ts-nocheck
+//@ts-nocheck
 "use server"
 
 import { createClient } from "@/utils/supabase/server"
@@ -67,6 +68,9 @@ export async function saveGeneralDetailsForm(formData: any) {
     const term_end_date =
       formData.term_end_date instanceof Date ? formData.term_end_date : new Date(formData.term_end_date)
 
+    // Ensure dates are properly formatted as Date objects for storage
+    
+
     // Prepare the form data in BSON format structure with Date objects
     const formDataToSave = {
       generalDetails: {
@@ -76,9 +80,12 @@ export async function saveGeneralDetailsForm(formData: any) {
         credits: formData.credits,
         term_start_date: term_start_date, // Store as Date object
         term_end_date: term_end_date, // Store as Date object
+        term_start_date: term_start_date, // Store as Date object
+        term_end_date: term_end_date, // Store as Date object
         course_prerequisites: formData.course_prerequisites,
         course_prerequisites_materials: formData.course_prerequisites_materials,
         courseOutcomes: formData.courseOutcomes,
+        remarks: formData.remarks || "",
         remarks: formData.remarks || "",
       },
     }
@@ -86,6 +93,7 @@ export async function saveGeneralDetailsForm(formData: any) {
     let result
 
     if (existingForm) {
+      console.log("Updating existing form...")
       // Update existing form - merge with existing data
       const existingFormData = existingForm.form || {}
       const updatedFormData = {
