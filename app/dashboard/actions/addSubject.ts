@@ -51,6 +51,7 @@ export async function addSubject(formData: FormData) {
       .select();
 
     if (error) {
+      console.error("Error adding subject:", error);
       return { success: false, error: error.message };
     }
 

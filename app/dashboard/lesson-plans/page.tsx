@@ -323,7 +323,7 @@ export default function LessonPlansPage() {
                           </Button>
                         </Link>
                         <Link
-                          href={`/dashboard/lesson-plans/${subject.id}/print`}
+                          href={`/print/${subject.id}`}
                         >
                         <Button size="sm" variant="outline" className="w-full">
                           <Printer className="h-4 w-4" />
