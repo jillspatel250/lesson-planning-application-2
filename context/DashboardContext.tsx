@@ -32,6 +32,7 @@ interface DashboardContextType {
   roleData: RoleDataItem[]
   currentRole: RoleDataItem
   setCurrentRole: (role: RoleDataItem) => void
+  updateUserData: (newData: Partial<UserData>) => void // Added this function
 }
 
 const DashboardContext = createContext<DashboardContextType | null>(null)
@@ -41,9 +42,10 @@ export const DashboardProvider = ({
   value,
 }: {
   children: ReactNode
-  value: Omit<DashboardContextType, "currentRole" | "setCurrentRole">
+  value: Omit<DashboardContextType, "currentRole" | "setCurrentRole" | "updateUserData"> // Updated type
 }) => {
   const [currentRole, setCurrentRoleState] = useState<RoleDataItem>(value.roleData[0])
+  const [userData, setUserData] = useState<UserData>(value.userData) // Add state for userData
 
   useEffect(() => {
     if (typeof window !== "undefined") {
@@ -57,6 +59,11 @@ export const DashboardProvider = ({
     }
   }, [value.roleData])
 
+  // Update userData when value.userData changes (from props)
+  useEffect(() => {
+    setUserData(value.userData)
+  }, [value.userData])
+
   const setCurrentRole = (role: RoleDataItem) => {
     setCurrentRoleState(role)
     // Save to localStorage
@@ -65,8 +72,26 @@ export const DashboardProvider = ({
     }
   }
 
+  // Add updateUserData function
+  const updateUserData = (newData: Partial<UserData>) => {
+    setUserData((prevData) => ({
+      ...prevData,
+      ...newData,
+    }))
+  }
+
   return (
-    <DashboardContext.Provider value={{ ...value, currentRole, setCurrentRole }}>{children}</DashboardContext.Provider>
+    <DashboardContext.Provider
+      value={{
+        ...value,
+        userData, // Use state instead of value.userData
+        currentRole,
+        setCurrentRole,
+        updateUserData,
+      }}
+    >
+      {children}
+    </DashboardContext.Provider>
   )
 }
 
