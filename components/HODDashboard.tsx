@@ -239,6 +239,8 @@ export default function HODDashboard() {
     return Array.from(facultyMap.values())
   }, [faculty])
 
+  console.log("Unique Faculty:", uniqueFaculty)
+
   const handleRoleChange = (roleName: string) => {
     const selectedRole = roleData.find((role) => role.role_name === roleName)
     if (selectedRole) {
@@ -504,7 +506,7 @@ export default function HODDashboard() {
     try {
       const result = await addSubject(formData)
       if (result.success) {
-        toast.success("Subject added successfully with term dates")
+        toast.success("Subject added successfully...")
         subjectForm.reset({
           departmentId: currentRole.depart_id,
           semester: 1,
@@ -587,6 +589,8 @@ export default function HODDashboard() {
       </div>
     )
   }
+
+  console.log(uniqueFaculty);
 
   return (
     <div className="pt-3 px-5">

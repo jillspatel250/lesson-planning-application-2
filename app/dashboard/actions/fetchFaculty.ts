@@ -36,12 +36,7 @@ export async function fetchFaculty() {
           profile_photo
         ),
         subjects (
-          id,
-          name,
-          code,
-          semester,
-          credits,
-          department_id
+          *
         )
       `)
       .eq("role_name", "Faculty")

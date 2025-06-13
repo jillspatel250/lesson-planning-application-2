@@ -1636,7 +1636,7 @@ export default function LessonPlansPage() {
                             View LP
                           </Button>
                         </Link>
-                        <Link href={`/dashboard/lesson-plans/${subject.id}/print`}>
+                        <Link href={`/print/${subject.id}`}>
                           <Button size="sm" variant="outline" className="w-full">
                             <Printer className="h-4 w-4" />
                             Print LP
