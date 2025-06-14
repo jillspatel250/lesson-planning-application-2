@@ -2224,7 +2224,6 @@ const skillMappingOptions = [
   "Creativity and Design Thinking Skills",
   "Ethical, Social, and Environmental Awareness Skills",
   "Other",
-  "Other",
 ]
 
 export default function CIEPlanningForm({ lessonPlan, setLessonPlan, userData }: CIEPlanningFormProps) {
@@ -2244,7 +2243,6 @@ export default function CIEPlanningForm({ lessonPlan, setLessonPlan, userData }:
   const [currentWarning, setCurrentWarning] = useState("")
   const [isSavingDraft, setIsSavingDraft] = useState(false)
   const [lastSaved, setLastSaved] = useState<Date | null>(null)
-  const [isLoadingDraft, setIsLoadingDraft] = useState(false)
   const [isLoadingDraft, setIsLoadingDraft] = useState(false)
 
   // FIXED: Field-specific error states
@@ -2538,15 +2536,7 @@ export default function CIEPlanningForm({ lessonPlan, setLessonPlan, userData }:
 
       const calculatedDuration = calculateMinimumDuration(marks, blooms)
 
-
       // Always update duration when marks or blooms change
-      // For 50 marks, set to 150 minutes regardless of bloom's taxonomy
-      if (marks === 50) {
-        updatedCIEs[index].duration = 150
-        toast.info("Duration automatically set to 150 minutes for 50 marks")
-      } else {
-        updatedCIEs[index].duration = Math.max(calculatedDuration, 30) // Ensure minimum 30 minutes
-      }
       // For 50 marks, set to 150 minutes regardless of bloom's taxonomy
       if (marks === 50) {
         updatedCIEs[index].duration = 150
@@ -2572,12 +2562,6 @@ export default function CIEPlanningForm({ lessonPlan, setLessonPlan, userData }:
         setDurationError(`Duration should be at least ${minDuration} minutes based on marks and Bloom's taxonomy`)
       } else {
         setDurationError("")
-      }
-
-      // IMPORTANT: Force cap at 50 minutes for Quiz/MCQ regardless of marks
-      if (pedagogy === "Objective-Based Assessment (Quiz/MCQ)" && value > 50) {
-        updatedCIEs[index].duration = 50
-        toast.info("Duration automatically adjusted to 50 minutes for Quiz/MCQ")
       }
 
       // IMPORTANT: Force cap at 50 minutes for Quiz/MCQ regardless of marks
@@ -2701,29 +2685,7 @@ export default function CIEPlanningForm({ lessonPlan, setLessonPlan, userData }:
     }
 
     // Real-time validation for evaluation pedagogy
-    // Real-time validation for evaluation pedagogy
     if (field === "evaluation_pedagogy") {
-      if (value === "Objective-Based Assessment (Quiz/MCQ)") {
-        // Always cap duration at 50 minutes for Quiz/MCQ
-        if (updatedCIEs[index].duration > 50) {
-          updatedCIEs[index].duration = 50
-          toast.info("Duration automatically adjusted to 50 minutes for Quiz/MCQ")
-        }
-
-        // Auto-set marks to 50 if not already set
-        if (!updatedCIEs[index].marks) {
-          updatedCIEs[index].marks = 50
-          toast.info("Marks automatically set to 50 for Quiz/MCQ")
-        }
-      }
-
-      // Add this new code to handle the "Other" pedagogy option
-      if (value === "Other") {
-        // Clear any existing other_pedagogy value when switching to "Other"
-        updatedCIEs[index].other_pedagogy = ""
-
-        // Set a reminder toast for the user
-        toast.info("Please specify the custom pedagogy in the field below")
       if (value === "Objective-Based Assessment (Quiz/MCQ)") {
         // Always cap duration at 50 minutes for Quiz/MCQ
         if (updatedCIEs[index].duration > 50) {
@@ -2760,7 +2722,6 @@ export default function CIEPlanningForm({ lessonPlan, setLessonPlan, userData }:
     if (!marks || !bloomsLevels || bloomsLevels.length === 0) return 30
 
     // Check if we have higher order thinking skills
-    // Check if we have higher order thinking skills
     const hasHigherOrder = bloomsLevels.some((level) => ["Analyze", "Evaluate", "Create"].includes(level))
     const hasOnlyLowerOrder = bloomsLevels.every((level) => ["Remember", "Understand"].includes(level))
 
@@ -2772,16 +2733,6 @@ export default function CIEPlanningForm({ lessonPlan, setLessonPlan, userData }:
       duration = marks * 3 // 1 mark = 3 minutes for higher order
     } else {
       duration = marks * 2.5 // Mixed levels
-    }
-
-    // For 100 marks, cap at 100 minutes
-    if (marks === 100) {
-      return Math.min(100, Math.max(duration, 30))
-    }
-
-    // For 50 marks, recommended duration is 150 minutes
-    if (marks === 50) {
-      return 150
     }
 
     // For 100 marks, cap at 100 minutes
@@ -2825,21 +2776,6 @@ export default function CIEPlanningForm({ lessonPlan, setLessonPlan, userData }:
       if (hasInvalidBlooms) {
         errors.push(`CIE ${index + 1}: Open Book Assessment only allows Analyze, Evaluate, and Create levels`)
       }
-    }
-
-    // Add validation for marks based on evaluation pedagogy
-    if (cie.evaluation_pedagogy === "Objective-Based Assessment (Quiz/MCQ)" && cie.duration > 50) {
-      errors.push(`CIE ${index + 1}: Quiz/MCQ duration cannot exceed 50 minutes`)
-    }
-
-    // Add validation for marks based on evaluation pedagogy
-    if (cie.evaluation_pedagogy === "Objective-Based Assessment (Quiz/MCQ)" && cie.marks > 50 && cie.marks !== 100) {
-      errors.push(`CIE ${index + 1}: Quiz/MCQ marks should be 50 or 100`)
-    }
-
-    // Add validation for Other pedagogy
-    if (cie.evaluation_pedagogy === "Other" && (!cie.other_pedagogy || cie.other_pedagogy.trim() === "")) {
-      errors.push(`CIE ${index + 1}: Please specify the custom pedagogy when selecting "Other"`)
     }
 
     // Add validation for marks based on evaluation pedagogy
@@ -3273,7 +3209,6 @@ export default function CIEPlanningForm({ lessonPlan, setLessonPlan, userData }:
       updatedCIEs[cieIndex].skill_mapping[skillIndex] = {
         skill: "",
         details: "",
-        otherSkill: "",
         otherSkill: "",
       }
     }
@@ -3929,16 +3864,6 @@ export default function CIEPlanningForm({ lessonPlan, setLessonPlan, userData }:
                   return
                 }
 
-
-                // For 50 marks, enforce 150 minutes
-                if (marks === 50) {
-                  handleCIEChange(activeCIE, "duration", 150)
-                  if (currentCIE.duration !== 150) {
-                    toast.info("Duration automatically adjusted to 150 minutes for 50 marks")
-                  }
-                  return
-                }
-
                 const minDuration = Math.max(calculateMinimumDuration(marks, blooms), 30)
 
                 if (currentCIE.duration < minDuration) {
@@ -4070,18 +3995,13 @@ export default function CIEPlanningForm({ lessonPlan, setLessonPlan, userData }:
           {currentCIE.evaluation_pedagogy === "Other" && (
             <div className="mt-2">
               <Label htmlFor="other-pedagogy">Specify Other Pedagogy *</Label>
-              <Label htmlFor="other-pedagogy">Specify Other Pedagogy *</Label>
               <Input
                 id="other-pedagogy"
                 value={currentCIE.other_pedagogy || ""}
                 onChange={(e) => handleCIEChange(activeCIE, "other_pedagogy", e.target.value)}
                 placeholder="Enter custom pedagogy"
                 className={`mt-1 ${!currentCIE.other_pedagogy ? "border-red-300 focus:ring-red-500" : ""}`}
-                className={`mt-1 ${!currentCIE.other_pedagogy ? "border-red-300 focus:ring-red-500" : ""}`}
               />
-              {!currentCIE.other_pedagogy && (
-                <p className="text-red-500 text-xs mt-1">Custom pedagogy is required when selecting "Other"</p>
-              )}
             </div>
           )}
         </div>
@@ -4094,7 +4014,6 @@ export default function CIEPlanningForm({ lessonPlan, setLessonPlan, userData }:
               CO Mapping{" "}
               {["Lecture CIE", "Course Prerequisites CIE", "Mid-term/Internal Exam"].includes(currentCIE.type)
                 ? "*"
-                : ""}
                 : ""}
             </Label>
             <Select
@@ -4306,22 +4225,6 @@ export default function CIEPlanningForm({ lessonPlan, setLessonPlan, userData }:
                         />
                       </div>
                     )}
-
-                    {/* Add this conditional rendering for "Other" skill option */}
-                    {skillMap.skill === "Other" && (
-                      <div className="mt-2">
-                        <Label htmlFor={`other-skill-${skillIndex}`}>Specify Other Skill</Label>
-                        <Input
-                          id={`other-skill-${skillIndex}`}
-                          value={skillMap.otherSkill || ""}
-                          onChange={(e) =>
-                            handleSkillMappingChange(activeCIE, skillIndex, "otherSkill", e.target.value)
-                          }
-                          placeholder="Enter custom skill"
-                          className="mt-1"
-                        />
-                      </div>
-                    )}
                   </div>
 
                   <div>
@@ -4407,4 +4310,3 @@ export default function CIEPlanningForm({ lessonPlan, setLessonPlan, userData }:
     </div>
   )
 }
-

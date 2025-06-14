@@ -1206,7 +1206,6 @@ export default function GeneralDetailsForm({ lessonPlan, setLessonPlan, openPdfV
             ;(nextTab as HTMLElement).click()
           }
         }, 500)
-        }, 500)
       } else {
         toast.error(result.error || "Failed to save general details")
         console.error("Save error:", result)
@@ -1261,7 +1260,7 @@ export default function GeneralDetailsForm({ lessonPlan, setLessonPlan, openPdfV
           <div className="bg-white rounded-lg w-full max-w-4xl h-[80vh] flex flex-col">
             <div className="flex items-center justify-between p-4 border-b">
               <h3 className="text-lg font-semibold">Course Prerequisites Instructions</h3>
-              <Button variant="ghost" size="icon" onClick={() => setShowInstructions(false)}>
+              <Button variant="ghost" size="icon" onClick={() => setShowInstructions(false)}/>
               <h3 className="text-lg font-semibold">Course Prerequisites Instructions</h3>
               <Button variant="ghost" size="icon" onClick={() => setShowInstructions(false)}>
                 <XCircle className="h-5 w-5" />
@@ -1350,7 +1349,7 @@ export default function GeneralDetailsForm({ lessonPlan, setLessonPlan, openPdfV
               </div>
             </div>
             <div className="p-4 border-t flex justify-end">
-              <Button variant="outline" onClick={() => setShowInstructions(false)}>
+              <Button variant="outline" onClick={() => setShowInstructions(false)} />
               <Button variant="outline" onClick={() => setShowInstructions(false)}>
                 Close
               </Button>
@@ -1502,8 +1501,10 @@ export default function GeneralDetailsForm({ lessonPlan, setLessonPlan, openPdfV
           rows={4}
         />
         {coursePrerequisitesMaterialsError && (
+          <div>
           <p className="text-red-500 text-xs mt-1">{coursePrerequisitesMaterialsError}</p>
           <p className="text-red-500 text-xs mt-1">{coursePrerequisitesMaterialsError}</p>
+        </div>
         )}
       </div>
 
@@ -1539,7 +1540,7 @@ export default function GeneralDetailsForm({ lessonPlan, setLessonPlan, openPdfV
         {courseOutcomesError && <p className="text-red-500 text-xs mt-1">{courseOutcomesError}</p>}
         {courseOutcomesError && <p className="text-red-500 text-xs mt-1">{courseOutcomesError}</p>}
 
-        <Button type="button" onClick={handleAddCourseOutcome} className="bg-[#1A5CA1] hover:bg-[#154A80]">
+        <Button type="button" onClick={handleAddCourseOutcome} className="bg-[#1A5CA1] hover:bg-[#154A80]" />
         <Button type="button" onClick={handleAddCourseOutcome} className="bg-[#1A5CA1] hover:bg-[#154A80]">
           <PlusCircle className="h-4 w-4 mr-2" />
           Add Course Outcome
@@ -1572,6 +1573,5 @@ export default function GeneralDetailsForm({ lessonPlan, setLessonPlan, openPdfV
         </div>
       </div>
     </form>
-  )
   )
 }
