@@ -1559,18 +1559,7 @@ export default function LessonPlansPage() {
           {currentRole.role_name === "Faculty" ? "Lesson Planning" : `${currentRole.role_name} Dashboard`}
         </p>
         <div className="flex items-center gap-3">
-          {currentRole.role_name === "Faculty" && (
-            <Button
-              onClick={handleRefresh}
-              disabled={isRefreshing}
-              variant="outline"
-              size="sm"
-              className="flex items-center gap-2"
-            >
-              <RefreshCw className={`h-4 w-4 ${isRefreshing ? "animate-spin" : ""}`} />
-              {isRefreshing ? "Refreshing..." : "Refresh Status"}
-            </Button>
-          )}
+         
           <Select onValueChange={handleRoleChange} value={currentRole.role_name}>
             <SelectTrigger className="w-[180px]">
               <SelectValue placeholder={currentRole.role_name} />
