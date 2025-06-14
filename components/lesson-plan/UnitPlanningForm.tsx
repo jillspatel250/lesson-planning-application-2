@@ -1,6 +1,5 @@
 
 // //@ts-nocheck
-// //@ts-nocheck
 
 // "use client"
 
@@ -3014,7 +3013,6 @@ export default function UnitPlanningForm({ lessonPlan, setLessonPlan }: UnitPlan
                 co_mapping: [],
                 skill_mapping: [],
                 other_skill: "",
-                other_skill: "",
                 skill_objectives: "",
                 interlink_topics: "",
                 topics_beyond_unit: "",
@@ -3237,7 +3235,6 @@ export default function UnitPlanningForm({ lessonPlan, setLessonPlan }: UnitPlan
       other_pedagogy: "",
       co_mapping: [],
       skill_mapping: [],
-      other_skill: "",
       other_skill: "",
       skill_objectives: "",
       interlink_topics: "",
@@ -4110,21 +4107,9 @@ export default function UnitPlanningForm({ lessonPlan, setLessonPlan }: UnitPlan
                     setValue(`units.${activeUnit}.probable_start_date`, e.target.value)
                     validateDateOrder(activeUnit)
                   }}
-                  className={
-                    watch(`units.${activeUnit}.dateFormatError`) || watch(`units.${activeUnit}.dateOrderError`)
-                      ? "border-red-500"
-                      : ""
-                  }
-                  onChange={(e) => {
-                    setValue(`units.${activeUnit}.probable_start_date`, e.target.value)
-                    validateDateOrder(activeUnit)
-                  }}
                 />
                 {errors.units?.[activeUnit]?.probable_start_date && (
                   <p className="text-red-500 text-sm mt-1">{errors.units[activeUnit]?.probable_start_date?.message}</p>
-                )}
-                {watch(`units.${activeUnit}.dateFormatError`) && (
-                  <p className="text-red-500 text-sm mt-1">{watch(`units.${activeUnit}.dateFormatError`)}</p>
                 )}
                 {watch(`units.${activeUnit}.dateFormatError`) && (
                   <p className="text-red-500 text-sm mt-1">{watch(`units.${activeUnit}.dateFormatError`)}</p>
@@ -4148,21 +4133,9 @@ export default function UnitPlanningForm({ lessonPlan, setLessonPlan }: UnitPlan
                     setValue(`units.${activeUnit}.probable_end_date`, e.target.value)
                     validateDateOrder(activeUnit)
                   }}
-                  className={
-                    watch(`units.${activeUnit}.dateFormatError`) || watch(`units.${activeUnit}.dateOrderError`)
-                      ? "border-red-500"
-                      : ""
-                  }
-                  onChange={(e) => {
-                    setValue(`units.${activeUnit}.probable_end_date`, e.target.value)
-                    validateDateOrder(activeUnit)
-                  }}
                 />
                 {errors.units?.[activeUnit]?.probable_end_date && (
                   <p className="text-red-500 text-sm mt-1">{errors.units[activeUnit]?.probable_end_date?.message}</p>
-                )}
-                {watch(`units.${activeUnit}.dateOrderError`) && (
-                  <p className="text-red-500 text-sm mt-1">{watch(`units.${activeUnit}.dateOrderError`)}</p>
                 )}
                 {watch(`units.${activeUnit}.dateOrderError`) && (
                   <p className="text-red-500 text-sm mt-1">{watch(`units.${activeUnit}.dateOrderError`)}</p>
@@ -4233,7 +4206,6 @@ export default function UnitPlanningForm({ lessonPlan, setLessonPlan }: UnitPlan
             {/* Teaching Pedagogy - Updated with 2 sections only */}
             <div>
               <Label className="mb-4 block text-base font-semibold">
-                Teaching Pedagogy <span className="text-red-500">*</span>
                 Teaching Pedagogy <span className="text-red-500">*</span>
               </Label>
 
@@ -4418,14 +4390,6 @@ export default function UnitPlanningForm({ lessonPlan, setLessonPlan }: UnitPlan
                     if (!current.includes(value)) {
                       handleSkillMapping(activeUnit, value, true)
                     }
-                  if (value === "Other") {
-                    // Show the input field for "Other" skill
-                    setValue(`units.${activeUnit}.show_other_skill_input`, true)
-                  } else {
-                    const current = watch(`units.${activeUnit}.skill_mapping`) || []
-                    if (!current.includes(value)) {
-                      handleSkillMapping(activeUnit, value, true)
-                    }
                   }
                 }}
               >
@@ -4441,52 +4405,8 @@ export default function UnitPlanningForm({ lessonPlan, setLessonPlan }: UnitPlan
                       </SelectItem>
                     ))}
                   <SelectItem value="Other">Other</SelectItem>
-                  {skillMappingOptions
-                    .filter((skill) => skill !== "Other")
-                    .map((skill) => (
-                      <SelectItem key={skill} value={skill}>
-                        {skill}
-                      </SelectItem>
-                    ))}
-                  <SelectItem value="Other">Other</SelectItem>
                 </SelectContent>
               </Select>
-
-              {/* Other Skill Input - Shows when "Other" is selected */}
-              {watch(`units.${activeUnit}.show_other_skill_input`) && (
-                <div className="mt-3 flex gap-2">
-                  <Input
-                    placeholder="Enter other skill"
-                    value={watch(`units.${activeUnit}.other_skill`) || ""}
-                    onChange={(e) => setValue(`units.${activeUnit}.other_skill`, e.target.value)}
-                    className="bg-white"
-                  />
-                  <Button
-                    type="button"
-                    variant="outline"
-                    onClick={() => {
-                      const otherValue = watch(`units.${activeUnit}.other_skill`)
-                      if (otherValue && otherValue.trim()) {
-                        handleSkillMapping(activeUnit, `Other: ${otherValue}`, true)
-                        setValue(`units.${activeUnit}.other_skill`, "")
-                        setValue(`units.${activeUnit}.show_other_skill_input`, false)
-                      }
-                    }}
-                  >
-                    Add
-                  </Button>
-                  <Button
-                    type="button"
-                    variant="ghost"
-                    onClick={() => {
-                      setValue(`units.${activeUnit}.show_other_skill_input`, false)
-                      setValue(`units.${activeUnit}.other_skill`, "")
-                    }}
-                  >
-                    Cancel
-                  </Button>
-                </div>
-              )}
 
               {/* Other Skill Input - Shows when "Other" is selected */}
               {watch(`units.${activeUnit}.show_other_skill_input`) && (
