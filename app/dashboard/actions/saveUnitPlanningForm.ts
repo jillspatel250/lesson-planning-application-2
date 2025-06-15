@@ -146,7 +146,7 @@ export async function saveUnitPlanningForm(data: z.infer<typeof saveUnitPlanning
     if (error instanceof z.ZodError) {
       return {
         success: false,
-        error: "Validation failed",
+        error: "Fill all required fields before submitting the form !!",
         fieldErrors: error.flatten().fieldErrors,
       }
     }
