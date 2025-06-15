@@ -196,15 +196,13 @@ export default function CIEPlanningForm({
     daysDifference: number;
     isWithin10Days: boolean;
   } | null>(null);
-
-  // NEW: Function to check for CIE date conflicts
+  // Modified: Function to check for CIE date conflicts - returns result instead of setting state
   const checkCIEDateConflict = async (
     selectedDate: string,
     currentCIEIndex: number
   ) => {
     if (!selectedDate || !lessonPlan.subject?.id) {
-      setDateConflictError("");
-      return;
+      return { hasConflict: false, errorMessage: "" };
     }
 
     setIsCheckingDateConflict(true);
@@ -239,9 +237,7 @@ export default function CIEPlanningForm({
         return;
       }
 
-      const subjectIds = sameSubjects.map((s) => s.id);
-
-      // Get all forms for subjects in the same semester and department
+      const subjectIds = sameSubjects.map((s) => s.id);      // Get all forms for subjects in the same semester and department
       const { data: allForms, error: formsError } = await supabase
         .from("forms")
         .select("form, subject_id, faculty_id")
@@ -252,10 +248,29 @@ export default function CIEPlanningForm({
         setIsCheckingDateConflict(false);
         return;
       }
+      
+      // Get faculty and subject details for better error messages
+      const { data: facultiesData, error: facultyError } = await supabase
+        .from("users")
+        .select("id, first_name, last_name")
+        .in("id", allForms.map(record => record.faculty_id));
+      
+      const { data: subjectsData, error: subjectsDataError } = await supabase
+        .from("subjects")
+        .select("id, name, code")
+        .in("id", allForms.map(record => record.subject_id));
+        
+      if (facultyError || subjectsDataError) {
+        console.error("Error fetching faculty or subject details:", facultyError || subjectsDataError);
+      }
 
       // Check for date conflicts
       let hasConflict = false;
-      const conflictingCIEs: string[] = [];
+      const conflictingCIEs: Array<{
+        cieName: string;
+        subjectName: string;
+        facultyName: string;
+      }> = [];
 
       for (const formRecord of allForms) {
         const form = formRecord.form;
@@ -279,32 +294,39 @@ export default function CIEPlanningForm({
 
               if (cieDate === selectedDateFormatted) {
                 hasConflict = true;
-                // Get subject name for better error message
-                const conflictSubject = sameSubjects.find(
-                  (s) => s.id === formRecord.subject_id
-                );
-                conflictingCIEs.push(
-                  `${cie.type || "CIE"} (${
-                    formRecord.subject_id === lessonPlan.subject.id
-                      ? "Same Subject"
-                      : "Different Subject"
-                  })`
-                );
+                
+                // Find faculty details
+                const facultyInfo = facultiesData?.find(f => f.id === formRecord.faculty_id);
+                const facultyName = facultyInfo 
+                  ? `${facultyInfo.first_name} ${facultyInfo.last_name}`
+                  : "Unknown Faculty";
+                  
+                // Find subject details
+                const subjectInfo = subjectsData?.find(s => s.id === formRecord.subject_id);
+                const subjectName = subjectInfo 
+                  ? `${subjectInfo.name} (${subjectInfo.code || 'No code'})`
+                  : "Unknown Subject";
+                
+                conflictingCIEs.push({
+                  cieName: cie.type || "CIE",
+                  subjectName,
+                  facultyName
+                });
               }
             }
           }
         }
-      }
-
-      if (hasConflict) {
-        setDateConflictError("Other CIE schedule in this date");
-        setDateError("Other CIE schedule in this date");
+      }      // Return conflict status and message instead of setting state
+      if (hasConflict && conflictingCIEs.length > 0) {
+        const firstConflict = conflictingCIEs[0];
+        const errorMsg = `There is another ${firstConflict.cieName} taken by ${firstConflict.facultyName} on the same date for ${firstConflict.subjectName}`;
+        return { hasConflict: true, errorMessage: errorMsg };
       } else {
-        setDateConflictError("");
-        setDateError("");
+        return { hasConflict: false, errorMessage: "" };
       }
     } catch (error) {
       console.error("Error checking CIE date conflict:", error);
+      return { hasConflict: false, errorMessage: "" };
     } finally {
       setIsCheckingDateConflict(false);
     }
@@ -603,16 +625,17 @@ export default function CIEPlanningForm({
 
     loadPsoPeoData();
   }, [lessonPlan.subject?.id]);
-
   const handleCIEChange = async (index: number, field: string, value: any) => {
     const updatedCIEs = [...(lessonPlan.cies || [])];
 
     // Handle date conversion from HTML5 input (YYYY-MM-DD) to our format (DD-MM-YYYY)
     if (field === "date" && value) {
       value = convertYYYYMMDDToDDMMYYYY(value);
-
-      // NEW: Check for date conflicts in real-time
-      await checkCIEDateConflict(value, index);
+      
+      // Clear any existing date conflict errors when date is changed
+      // Date conflict check will only happen on form submission
+      setDateConflictError("");
+      setDateError("");
     }
 
     updatedCIEs[index] = {
@@ -1593,10 +1616,24 @@ export default function CIEPlanningForm({
 
     // Collect all validation errors in one array
     const allErrors: string[] = [];
-
-    // NEW: Check for date conflicts before other validations
-    if (dateConflictError) {
-      allErrors.push(`CIE ${activeCIE + 1}: ${dateConflictError}`);
+      // Check for date conflicts for ALL CIEs before submission
+    // This replaces the real-time check that was removed from handleCIEChange
+    try {
+      // Check each CIE date for conflicts
+      for (let i = 0; i < updatedCIEs.length; i++) {
+        const cie = updatedCIEs[i];
+        if (cie.date) {
+          // New: Get conflict results directly from the function
+          const conflictResult = await checkCIEDateConflict(cie.date, i);
+          
+          // If we found a conflict for this CIE, add it to the errors
+          if (conflictResult.hasConflict) {
+            allErrors.push(`CIE ${i + 1}: ${conflictResult.errorMessage}`);
+          }
+        }
+      }
+    } catch (error) {
+      console.error("Error checking date conflicts:", error);
     }
 
     // Validate current CIE fields

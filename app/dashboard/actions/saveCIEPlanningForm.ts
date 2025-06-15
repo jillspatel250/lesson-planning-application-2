@@ -97,7 +97,7 @@ const checkCIEDateConflicts = async (
     // Get all subjects in the same semester and department
     const { data: sameSubjects, error: sameSubjectsError } = await supabase
       .from("subjects")
-      .select("id")
+      .select("id, name, code")
       .eq("semester", currentSubject.semester)
       .eq("department_id", currentSubject.department_id)
 
@@ -117,6 +117,16 @@ const checkCIEDateConflicts = async (
     if (formsError) {
       console.error("Error fetching forms for conflict check:", formsError)
       return errors
+    }
+    
+    // Get faculty information for better error messages
+    const { data: facultiesData, error: facultyError } = await supabase
+      .from("users")
+      .select("id, first_name, last_name")
+      .in("id", allForms.map((record: any) => record.faculty_id))
+    
+    if (facultyError) {
+      console.error("Error fetching faculty details:", facultyError)
     }
 
     // Check each CIE date for conflicts
@@ -139,7 +149,19 @@ const checkCIEDateConflicts = async (
               }
 
               if (cieDate === existingCIEDate) {
-                errors.push(`CIE ${cieIndex + 1}: Other CIE schedule in this date`)
+                // Find faculty name
+                const facultyInfo = facultiesData?.find((f: any) => f.id === formRecord.faculty_id)
+                const facultyName = facultyInfo 
+                  ? `${facultyInfo.first_name} ${facultyInfo.last_name}`
+                  : "another faculty"
+                
+                // Find subject name
+                const subjectInfo = sameSubjects.find((s: any) => s.id === formRecord.subject_id)
+                const subjectName = subjectInfo 
+                  ? `${subjectInfo.name} ${subjectInfo.code ? `(${subjectInfo.code})` : ''}`
+                  : "another subject"
+                
+                errors.push(`CIE ${cieIndex + 1}: There is another ${existingCIE.type || "CIE"} taken by ${facultyName} on the same date for ${subjectName}`)
                 break
               }
             }
