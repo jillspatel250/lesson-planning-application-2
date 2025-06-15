@@ -44,3 +44,4 @@ next-env.d.ts
 
 # Ignore test API routes
 /app/api/
+.env
