@@ -405,7 +405,7 @@ export const unitPlanningSchema = z.object({
         self_study_topics: z.string().optional(),
         self_study_materials: z.string().optional(),
         unit_materials: z.string().min(1, "Unit materials are required"),
-        teaching_pedagogy: z.array(z.string()).min(2, "At least two teaching pedagogies must be selected"),
+        teaching_pedagogy: z.array(z.string()).min(1, "At least one teaching pedagogies must be selected"),
         other_pedagogy: z.string().optional(),
         co_mapping: z.array(z.string()).min(1, "At least one CO must be mapped"),
         skill_mapping: z.array(z.string()).min(1, "At least one skill must be mapped"),
