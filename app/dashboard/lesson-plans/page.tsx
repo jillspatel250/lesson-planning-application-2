@@ -1299,6 +1299,10 @@
 // }
 
 
+
+
+
+
 "use client"
 
 import type React from "react"
@@ -1433,28 +1437,33 @@ export default function LessonPlansPage() {
   }
 
   // Get status from the actual database record, default to "In Progress"
-  const getStatusBadge = (subject: User_Role) => {
-    // Check localStorage first for immediate feedback
-    const subjectCode = subject.subjects?.code
-    if (subjectCode && localStorage.getItem(`${subjectCode}_submitted`) === "true") {
+ // 🔄 REPLACE THIS FUNCTION:
+const getStatusBadge = (subject: User_Role) => {
+  const status = subject.subjects?.lesson_plan_status || "draft"
+  
+  switch (status) {
+    case "submitted":
       return "Submitted"
-    }
-
-    const status = subject.status || "In Progress"
-    console.log(`📊 Status for ${subject.subjects?.name}:`, status)
-    return status === "submitted" ? "Submitted" : "In Progress"
+    case "in_progress":
+      return "In Progress"
+    case "draft":
+    default:
+      return "Draft"
   }
+}
 
-  const getStatusColor = (status: string) => {
-    switch (status) {
-      case "Submitted":
-        return "bg-green-100 text-green-800"
-      case "In Progress":
-        return "bg-yellow-100 text-yellow-800"
-      default:
-        return "bg-gray-100 text-gray-800"
-    }
+ // 🔄 REPLACE THIS FUNCTION:
+const getStatusColor = (status: string) => {
+  switch (status) {
+    case "Submitted":
+      return "bg-green-100 text-green-800"
+    case "In Progress":
+      return "bg-blue-100 text-blue-800"
+    case "Draft":
+    default:
+      return "bg-gray-100 text-gray-800"
   }
+}
 
   const handleRoleChange = (roleName: string) => {
     console.log("Attempting to change role to:", roleName)

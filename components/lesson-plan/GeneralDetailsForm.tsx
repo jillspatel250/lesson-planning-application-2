@@ -207,68 +207,155 @@ export default function GeneralDetailsForm({ lessonPlan, setLessonPlan, openPdfV
     }
   }
 
-  // DIRECT FETCH ON LOAD
+    // Add page refresh effect for faculty members
+    useEffect(() => {
+      // Check if the user is a faculty member
+      if (userData?.role === "faculty") {
+        // Using sessionStorage to ensure refresh happens only once per session
+        const hasRefreshed = sessionStorage.getItem("hasRefreshedGeneralDetails")
+  
+        if (!hasRefreshed) {
+          // Set the flag before refreshing to prevent infinite refresh loop
+          sessionStorage.setItem("hasRefreshedGeneralDetails", "true")
+  
+          // Use setTimeout to ensure the component is fully mounted before refreshing
+          setTimeout(() => {
+            window.location.reload()
+          }, 500)
+        }
+      }
+    }, [userData?.role]) // Only re-run if the user role changes
+
+
+  // // DIRECT FETCH ON LOAD
+  // useEffect(() => {
+  //   const fetchDates = async () => {
+  //     try {
+  //       if (!lessonPlan?.subject?.code) return
+
+  //       const { data, error } = await supabase
+  //         .from("subjects")
+  //         .select("metadata")
+  //         .eq("code", lessonPlan.subject.code)
+  //         .single()
+
+  //       if (error || !data) return
+
+  //       let metadata = data.metadata
+  //       if (typeof metadata === "string") {
+  //         try {
+  //           metadata = JSON.parse(metadata)
+  //         } catch (e) {
+  //           return
+  //         }
+  //       }
+
+  //       if (metadata?.term_start_date) {
+  //         setFacultyTermDates((prev) => ({
+  //           ...prev,
+  //           termStartDate: metadata.term_start_date,
+  //         }))
+  //       }
+
+  //       if (metadata?.term_end_date) {
+  //         setFacultyTermDates((prev) => ({
+  //           ...prev,
+  //           termEndDate: metadata.term_end_date,
+  //         }))
+  //       }
+  //     } catch (error) {
+  //       console.error("Error fetching dates:", error)
+  //     }
+  //   }
+
+  //   fetchDates()
+  // }, [lessonPlan?.subject?.code])
+
+
   useEffect(() => {
     const fetchDates = async () => {
       try {
-        if (!lessonPlan?.subject?.code) return
-
+        if (!lessonPlan?.subject?.code) {
+          console.log("❌ No subject code available")
+          return
+        }
+  
+        console.log("🔍 Fetching dates for subject:", lessonPlan.subject.code)
+  
         const { data, error } = await supabase
           .from("subjects")
           .select("metadata")
           .eq("code", lessonPlan.subject.code)
           .single()
-
-        if (error || !data) return
-
+  
+        if (error) {
+          console.error("❌ Database error:", error)
+          return
+        }
+  
+        if (!data) {
+          console.log("❌ No subject found")
+          return
+        }
+  
+        console.log("📊 Raw metadata:", data.metadata)
+  
         let metadata = data.metadata
+  
+        // Handle different metadata formats
         if (typeof metadata === "string") {
           try {
             metadata = JSON.parse(metadata)
+            console.log("📊 Parsed metadata:", metadata)
           } catch (e) {
+            console.error("❌ Error parsing metadata:", e)
             return
           }
         }
-
-        if (metadata?.term_start_date) {
+  
+        // Extract dates with multiple possible formats
+        const startDate = metadata?.term_start_date || metadata?.termStartDate
+        const endDate = metadata?.term_end_date || metadata?.termEndDate
+  
+        console.log("📅 Extracted dates:", { startDate, endDate })
+  
+        if (startDate) {
           setFacultyTermDates((prev) => ({
             ...prev,
-            termStartDate: metadata.term_start_date,
+            termStartDate: startDate,
           }))
+          console.log("✅ Start date set:", startDate)
         }
-
-        if (metadata?.term_end_date) {
+  
+        if (endDate) {
           setFacultyTermDates((prev) => ({
             ...prev,
-            termEndDate: metadata.term_end_date,
+            termEndDate: endDate,
           }))
+          console.log("✅ End date set:", endDate)
+        }
+  
+        if (startDate || endDate) {
+          // toast.success("Term dates loaded from database!")
+        } else {
+          console.log("⚠️ No dates found in metadata")
         }
       } catch (error) {
-        console.error("Error fetching dates:", error)
+        console.error("💥 Error fetching dates:", error)
       }
     }
-
-    fetchDates()
+  
+    // Add a small delay to ensure component is mounted
+    const timer = setTimeout(fetchDates, 100)
+    return () => clearTimeout(timer)
   }, [lessonPlan?.subject?.code])
 
-  // Add page refresh effect for faculty members
-  useEffect(() => {
-    // Check if the user is a faculty member
-    if (userData?.role === "faculty") {
-      // Using sessionStorage to ensure refresh happens only once per session
-      const hasRefreshed = sessionStorage.getItem("hasRefreshedGeneralDetails")
 
-      if (!hasRefreshed) {
-        // Set the flag before refreshing to prevent infinite refresh loop
-        sessionStorage.setItem("hasRefreshedGeneralDetails", "true")
 
-        // Use setTimeout to ensure the component is fully mounted before refreshing
-        setTimeout(() => {
-          window.location.reload()
-        }, 500)
-      }
-    }
-  }, [userData?.role]) // Only re-run if the user role changes
+
+
+
+
 
   const handleAddCourseOutcome = () => {
     setCourseOutcomes([...courseOutcomes, { id: uuidv4(), text: "" }])
