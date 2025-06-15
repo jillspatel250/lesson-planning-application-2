@@ -3536,7 +3536,7 @@ export default function CIEPlanningForm({ lessonPlan, setLessonPlan, userData }:
 
   return (
     <div className="p-6">
-      {/* FIXED: Debug Information Display - now shows correct dates from subjects table */}
+      {/* FIXED: Debug Information Display - now shows correct dates from subjects table
       {debugInfo && (
         <div className="mb-6 border border-blue-200 bg-blue-50 rounded-lg p-4">
           <div className="flex items-start">
@@ -3572,7 +3572,7 @@ export default function CIEPlanningForm({ lessonPlan, setLessonPlan, userData }:
             </div>
           </div>
         </div>
-      )}
+      )} */}
 
       {/* Loading indicator */}
       {isLoadingDraft && (
