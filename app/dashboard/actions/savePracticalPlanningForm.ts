@@ -183,20 +183,6 @@
 //   }
 // }
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 // "use server"
 
 // import { createClient } from "@/utils/supabase/server"
@@ -387,27 +373,16 @@
 //   }
 // }
 
+"use server";
 
-
-
-
-
-
-
-
-
-
-
-"use server"
-
-import { createClient } from "@/utils/supabase/server"
-import { revalidatePath } from "next/cache"
+import { createClient } from "@/utils/supabase/server";
+import { revalidatePath } from "next/cache";
 
 interface SavePracticalPlanningParams {
-  faculty_id: string
-  subject_id: string
-  practicals: any[]
-  remarks?: string
+  faculty_id: string;
+  subject_id: string;
+  practicals: any[];
+  remarks?: string;
 }
 
 export async function savePracticalPlanningForm({
@@ -417,32 +392,36 @@ export async function savePracticalPlanningForm({
   remarks,
 }: SavePracticalPlanningParams) {
   try {
-    const supabase = await createClient()
+    const supabase = await createClient();
 
     // Get subject data to check if it's practical-only
     const { data: subjectData, error: subjectError } = await supabase
       .from("subjects")
       .select("is_theory, is_practical")
       .eq("id", subject_id)
-      .single()
+      .single();
 
     if (subjectError) {
       return {
         success: false,
         error: `Failed to fetch subject data: ${subjectError.message}`,
-      }
+      };
     }
 
     // Check if subject is practical-only
-    const isPracticalOnly = subjectData?.is_practical === true && subjectData?.is_theory === false
+    const isPracticalOnly =
+      subjectData?.is_practical === true && subjectData?.is_theory === false;
 
     // Validate the form data
-    const validationResult = validatePracticalPlanning({ practicals, remarks }, isPracticalOnly)
+    const validationResult = validatePracticalPlanning(
+      { practicals, remarks },
+      isPracticalOnly
+    );
     if (!validationResult.isValid) {
       return {
         success: false,
         error: validationResult.message,
-      }
+      };
     }
 
     // Check if a form already exists for this faculty and subject
@@ -451,14 +430,14 @@ export async function savePracticalPlanningForm({
       .select("*")
       .eq("faculty_id", faculty_id)
       .eq("subject_id", subject_id)
-      .single()
+      .single();
 
     if (fetchError && fetchError.code !== "PGRST116") {
-      console.error("Error fetching existing form:", fetchError)
+      console.error("Error fetching existing form:", fetchError);
       return {
         success: false,
         error: "Failed to check existing form",
-      }
+      };
     }
 
     const formPayload = {
@@ -476,114 +455,162 @@ export async function savePracticalPlanningForm({
         practical_planning_completed: true,
         last_updated: new Date().toISOString(),
       },
-    }
+    };
 
-    let result
+    let result;
     if (existingForm) {
       // Update existing form
-      result = await supabase.from("forms").update(formPayload).eq("id", existingForm.id).select().single()
+      result = await supabase
+        .from("forms")
+        .update(formPayload)
+        .eq("id", existingForm.id)
+        .select()
+        .single();
     } else {
       // Create new form
-      result = await supabase.from("forms").insert(formPayload).select().single()
+      result = await supabase
+        .from("forms")
+        .insert(formPayload)
+        .select()
+        .single();
     }
 
     if (result.error) {
-      console.error("Error saving practical planning form:", result.error)
+      console.error("Error saving practical planning form:", result.error);
       return {
         success: false,
         error: "Failed to save practical planning form",
-      }
+      };
     }
 
-    revalidatePath("/dashboard/lesson-plans")
+    const { error: updateStatusError } = await supabase
+      .from("forms")
+      .update({ complete_practical: true })
+      .eq("id", existingForm.id)
+      .single(); 
+
+    revalidatePath("/dashboard/lesson-plans");
     return {
       success: true,
       data: result.data,
-    }
+    };
   } catch (error) {
-    console.error("Unexpected error saving practical planning form:", error)
+    console.error("Unexpected error saving practical planning form:", error);
     return {
       success: false,
       error: "An unexpected error occurred",
-    }
+    };
   }
 }
 
-function validatePracticalPlanning(formData: { practicals: any[]; remarks?: string }, isPracticalOnly = false) {
-  const errors: string[] = []
+function validatePracticalPlanning(
+  formData: { practicals: any[]; remarks?: string },
+  isPracticalOnly = false
+) {
+  const errors: string[] = [];
 
   // Check if at least one practical exists
   if (!formData.practicals || formData.practicals.length === 0) {
-    errors.push("At least one practical must be defined.")
+    errors.push("At least one practical must be defined.");
   }
 
   // Validate each practical
   formData.practicals.forEach((practical, index) => {
-    const practicalNum = index + 1
+    const practicalNum = index + 1;
 
     // Required field validations
     if (!practical.practical_aim?.trim()) {
-      errors.push(`Practical ${practicalNum}: Practical aim is required.`)
+      errors.push(`Practical ${practicalNum}: Practical aim is required.`);
     }
 
     // FIXED: Only validate associated units for non-practical-only subjects
-    if (!isPracticalOnly && (!practical.associated_units || practical.associated_units.length === 0)) {
-      errors.push(`Practical ${practicalNum}: At least one associated unit must be selected.`)
+    if (
+      !isPracticalOnly &&
+      (!practical.associated_units || practical.associated_units.length === 0)
+    ) {
+      errors.push(
+        `Practical ${practicalNum}: At least one associated unit must be selected.`
+      );
     }
 
     if (!practical.probable_week?.trim()) {
-      errors.push(`Practical ${practicalNum}: Probable week is required.`)
+      errors.push(`Practical ${practicalNum}: Probable week is required.`);
     }
 
     if (!practical.lab_hours || practical.lab_hours < 1) {
-      errors.push(`Practical ${practicalNum}: Lab hours must be at least 1.`)
+      errors.push(`Practical ${practicalNum}: Lab hours must be at least 1.`);
     }
 
     if (!practical.software_hardware_requirements?.trim()) {
-      errors.push(`Practical ${practicalNum}: Software/Hardware requirements are required.`)
+      errors.push(
+        `Practical ${practicalNum}: Software/Hardware requirements are required.`
+      );
     }
 
     if (!practical.practical_tasks?.trim()) {
-      errors.push(`Practical ${practicalNum}: Practical tasks/problem statement is required.`)
+      errors.push(
+        `Practical ${practicalNum}: Practical tasks/problem statement is required.`
+      );
     }
 
-    if (!practical.evaluation_methods || practical.evaluation_methods.length === 0) {
-      errors.push(`Practical ${practicalNum}: At least one evaluation method must be selected.`)
+    if (
+      !practical.evaluation_methods ||
+      practical.evaluation_methods.length === 0
+    ) {
+      errors.push(
+        `Practical ${practicalNum}: At least one evaluation method must be selected.`
+      );
     }
 
     if (!practical.practical_pedagogy?.trim()) {
-      errors.push(`Practical ${practicalNum}: Practical pedagogy is required.`)
+      errors.push(`Practical ${practicalNum}: Practical pedagogy is required.`);
     }
 
     if (!practical.reference_material?.trim()) {
-      errors.push(`Practical ${practicalNum}: Reference material is required.`)
+      errors.push(`Practical ${practicalNum}: Reference material is required.`);
     }
 
     if (!practical.co_mapping || practical.co_mapping.length === 0) {
-      errors.push(`Practical ${practicalNum}: At least one CO mapping must be selected.`)
+      errors.push(
+        `Practical ${practicalNum}: At least one CO mapping must be selected.`
+      );
     }
 
     if (!practical.blooms_taxonomy || practical.blooms_taxonomy.length === 0) {
-      errors.push(`Practical ${practicalNum}: At least one Bloom's taxonomy level must be selected.`)
+      errors.push(
+        `Practical ${practicalNum}: At least one Bloom's taxonomy level must be selected.`
+      );
     }
 
     if (!practical.skill_mapping || practical.skill_mapping.length === 0) {
-      errors.push(`Practical ${practicalNum}: At least one skill mapping must be selected.`)
+      errors.push(
+        `Practical ${practicalNum}: At least one skill mapping must be selected.`
+      );
     }
 
     if (!practical.skill_objectives?.trim()) {
-      errors.push(`Practical ${practicalNum}: Skill objectives are required.`)
+      errors.push(`Practical ${practicalNum}: Skill objectives are required.`);
     }
 
     // Validate "Other" fields
-    if (practical.evaluation_methods?.includes("Other") && !practical.other_evaluation_method?.trim()) {
-      errors.push(`Practical ${practicalNum}: Other evaluation method must be specified when "Other" is selected.`)
+    if (
+      practical.evaluation_methods?.includes("Other") &&
+      !practical.other_evaluation_method?.trim()
+    ) {
+      errors.push(
+        `Practical ${practicalNum}: Other evaluation method must be specified when "Other" is selected.`
+      );
     }
 
-    if (practical.practical_pedagogy === "Other" && !practical.other_pedagogy?.trim()) {
-      errors.push(`Practical ${practicalNum}: Other pedagogy must be specified when "Other" is selected.`)
+    if (
+      practical.practical_pedagogy === "Other" &&
+      !practical.other_pedagogy?.trim()
+    ) {
+      errors.push(
+        `Practical ${practicalNum}: Other pedagogy must be specified when "Other" is selected.`
+      );
     }
-  })
+  });
 
   if (errors.length > 0) {
     const message = `Dear Professor,
@@ -592,16 +619,16 @@ Kindly review the following requirements before saving the form:
 
 ${errors.map((error) => `• ${error}`).join("\n")}
 
-We appreciate your attention to detail in maintaining the academic integrity of your course design.`
+We appreciate your attention to detail in maintaining the academic integrity of your course design.`;
 
     return {
       isValid: false,
       message,
-    }
+    };
   }
 
   return {
     isValid: true,
     message: "",
-  }
+  };
 }

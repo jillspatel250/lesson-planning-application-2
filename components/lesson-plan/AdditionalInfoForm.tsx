@@ -288,6 +288,8 @@ export default function AdditionalInfoForm({ lessonPlan, setLessonPlan }: Additi
           )
         }
 
+        
+
         // Redirect to lesson plans page after a short delay
         setTimeout(() => {
           router.push("/dashboard/lesson-plans")

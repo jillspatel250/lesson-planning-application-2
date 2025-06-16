@@ -527,6 +527,12 @@ export async function saveAdditionalInfoForm(data: {
       }
     }
 
+    const { error: updateStatusError } = await supabase
+      .from("forms")
+      .update({ complete_additional: true })
+      .eq("id", existingForm.id)
+      .single(); 
+
     // Force revalidation of the lesson plans page
     revalidatePath("/dashboard/lesson-plans");
 

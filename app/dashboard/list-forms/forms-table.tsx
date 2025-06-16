@@ -5,7 +5,7 @@
 import { useState, useMemo } from "react"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { EyeIcon, File, ArrowUpDown } from "lucide-react"
+import { EyeIcon, File, ArrowUpDown, Printer } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import Link from "next/link"
@@ -201,7 +201,7 @@ export default function FormsTable({ forms, userrole, allDepartments }: FormsTab
                   {getSortIcon("code")}
                 </Button>
               </TableHead>
-              {isPrincipal && (
+              {/* {isPrincipal && (
                 <TableHead className="text-black font-bold text-lg">
                   <Button
                     variant="ghost"
@@ -212,17 +212,7 @@ export default function FormsTable({ forms, userrole, allDepartments }: FormsTab
                     {getSortIcon("department")}
                   </Button>
                 </TableHead>
-              )}
-              <TableHead className="text-black font-bold text-lg">
-                <Button
-                  variant="ghost"
-                  onClick={() => handleSort("date")}
-                  className="h-auto p-0 font-bold text-lg hover:bg-transparent"
-                >
-                  Submitted
-                  {getSortIcon("date")}
-                </Button>
-              </TableHead>
+              )} */}
               <TableHead className="text-black font-bold text-lg">Action</TableHead>
             </TableRow>
           </TableHeader>
@@ -236,35 +226,24 @@ export default function FormsTable({ forms, userrole, allDepartments }: FormsTab
             ) : (
               sortedForms.map((form) => (
                 <TableRow className="hover:bg-gray-50 text-lg" key={form.id}>
-                  <TableCell className="font-medium">{form.users.name}</TableCell>
-                  <TableCell>{form.subjects.name}</TableCell>
-                  <TableCell>
-                    <Badge variant="outline">{form.subjects.code}</Badge>
+                  <TableCell className="pl-5">{form.users.name}</TableCell>
+                  <TableCell className="pl-5">{form.subjects.name}</TableCell>
+                  <TableCell className="pl-5">{form.subjects.code}
                   </TableCell>
-                  {isPrincipal && (
-                    <TableCell>
-                      <Badge variant="secondary">{form.subjects.departments.name}</Badge>
+                  {/* {isPrincipal && (
+                    <TableCell className="">{form.subjects.departments.name}
                     </TableCell>
-                  )}
-                  <TableCell>
-                    {new Date(form.created_at).toLocaleDateString("en-US", {
-                      year: "numeric",
-                      month: "short",
-                      day: "numeric",
-                    })}
-                  </TableCell>
+                  )} */}
                   <TableCell>
                     <div className="flex space-x-2">
                       <Link href={`/dashboard/utility/submitted-form/${form.id}`}>
                         <Button variant="outline" size="sm">
                           <EyeIcon className="w-4 h-4 mr-1" />
-                          View LP
                         </Button>
                       </Link>
                       <Link href={`/print/${form.id}`} target="_blank">
                         <Button variant="outline" size="sm">
-                          <File className="w-4 h-4 mr-1" />
-                          Print LP
+                          <Printer className="w-4 h-4 mr-1" />
                         </Button>
                       </Link>
                     </div>
@@ -274,16 +253,6 @@ export default function FormsTable({ forms, userrole, allDepartments }: FormsTab
             )}
           </TableBody>
         </Table>
-      </div>
-
-      {/* Results Summary */}
-      <div className="flex items-center justify-between text-sm text-gray-600">
-        <div>
-          Showing {sortedForms.length} lesson plan form{sortedForms.length !== 1 ? "s" : ""}
-        </div>
-        {selectedDepartment !== "all" && isPrincipal && (
-          <div>Filtered by: {allDepartments.find((d) => d.id === selectedDepartment)?.name}</div>
-        )}
       </div>
     </div>
   )

@@ -8,6 +8,7 @@ import { fetchLessonPlanById } from "@/app/dashboard/actions/fetchLessonPlanById
 import { useDashboardContext } from "@/context/DashboardContext";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { toast } from "sonner";
+import { CodeSquare } from "lucide-react";
 
 function ViewLessonPlanPage() {
   const params = useParams();
@@ -60,6 +61,8 @@ function ViewLessonPlanPage() {
       </div>
     );
   }
+
+  console.log("Lesson Plan Data:", lessonPlan);
 
   const formatDate = (dateString: string) => {
     if (!dateString) return "N/A";
@@ -147,8 +150,8 @@ function ViewLessonPlanPage() {
                     Term Duration:
                   </td>
                   <td className="border border-black p-2 break-words overflow-hidden text-ellipsis max-w-0">
-                    {formatDate(lessonPlan.term_start_date)} to{" "}
-                    {formatDate(lessonPlan.term_end_date)}
+                    {lessonPlan.subject.metadata.term_start_date} to{" "}
+                    {lessonPlan.subject.metadata.term_end_date}
                   </td>
                 </tr>
                 <tr>
@@ -830,12 +833,12 @@ function ViewLessonPlanPage() {
                   <td className="border border-black p-3">
                     <span
                       className={`px-3 py-1 rounded font-medium ${
-                        lessonPlan.general_details_completed
+                        lessonPlan.complete_general
                           ? "bg-green-100 text-green-800"
                           : "bg-red-100 text-red-800"
                       }`}
                     >
-                      {lessonPlan.general_details_completed
+                      {lessonPlan.complete_general
                         ? "Submitted"
                         : "Pending"}
                     </span>
@@ -848,12 +851,12 @@ function ViewLessonPlanPage() {
                   <td className="border border-black p-3">
                     <span
                       className={`px-3 py-1 rounded font-medium ${
-                        lessonPlan.unit_planning_completed
+                        lessonPlan.complete_unit
                           ? "bg-green-100 text-green-800"
                           : "bg-red-100 text-red-800"
                       }`}
                     >
-                      {lessonPlan.unit_planning_completed
+                      {lessonPlan.complete_unit
                         ? "Submitted"
                         : "Pending"}
                     </span>
@@ -866,12 +869,12 @@ function ViewLessonPlanPage() {
                   <td className="border border-black p-3">
                     <span
                       className={`px-3 py-1 rounded font-medium ${
-                        lessonPlan.practical_planning_completed
+                        lessonPlan.complete_practical
                           ? "bg-green-100 text-green-800"
                           : "bg-red-100 text-red-800"
                       }`}
                     >
-                      {lessonPlan.practical_planning_completed
+                      {lessonPlan.complete_practical
                         ? "Submitted"
                         : "Pending"}
                     </span>
@@ -884,12 +887,12 @@ function ViewLessonPlanPage() {
                   <td className="border border-black p-3">
                     <span
                       className={`px-3 py-1 rounded font-medium ${
-                        lessonPlan.cie_planning_completed
+                        lessonPlan.complete_cie
                           ? "bg-green-100 text-green-800"
                           : "bg-red-100 text-red-800"
                       }`}
                     >
-                      {lessonPlan.cie_planning_completed
+                      {lessonPlan.complete_cie
                         ? "Submitted"
                         : "Pending"}
                     </span>
@@ -902,12 +905,12 @@ function ViewLessonPlanPage() {
                   <td className="border border-black p-3">
                     <span
                       className={`px-3 py-1 rounded font-medium ${
-                        lessonPlan.additional_info_completed
+                        lessonPlan.complete_additional
                           ? "bg-green-100 text-green-800"
                           : "bg-red-100 text-red-800"
                       }`}
                     >
-                      {lessonPlan.additional_info_completed
+                      {lessonPlan.complete_additional
                         ? "Submitted"
                         : "Pending"}
                     </span>

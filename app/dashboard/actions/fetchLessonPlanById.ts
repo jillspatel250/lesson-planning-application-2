@@ -42,12 +42,28 @@ export async function fetchLessonPlanById(lessonPlanId: string) {
       }
     }
 
-    // Get the user role assignment for this lesson plan
+    // Get the user role assignment for this lesson plan with complete subjects data
     const { data: assignment, error: assignmentError } = await supabase
       .from("user_role")
       .select(`
         *,
-        subjects (*),
+        subjects (
+          id,
+          code,
+          name,
+          semester,
+          lecture_hours,
+          lab_hours,
+          abbreviation_name,
+          credits,
+          department_id,
+          is_practical,
+          is_theory,
+          metadata,
+          pso,
+          peo,
+          lesson_plan_status
+        ),
         users (*)
       `)
       .eq("id", lessonPlanId)
@@ -60,11 +76,13 @@ export async function fetchLessonPlanById(lessonPlanId: string) {
     // Get existing form data
     const { data: existingForm, error: formError } = await supabase
       .from("forms")
-      .select("form")
+      .select("form, complete_general, complete_unit, complete_practical, complete_cie, complete_additional")
       // @ts-ignore
       .eq("faculty_id", userData.id)
       .eq("subject_id", assignment.subjects.id)
       .single()
+
+      console.log("Existing Form Data:", existingForm)
 
     // Get lesson plan data
     const { data: lessonPlanData, error: lessonPlanError } = await supabase
@@ -172,7 +190,7 @@ export async function fetchLessonPlanById(lessonPlanId: string) {
       }
     })
 
-    // Construct the lesson plan object with saved data
+    // Construct the lesson plan object with saved data including all subjects table fields
     const lessonPlan = {
       id: lessonPlanData?.id || lessonPlanId,
       subject: {
@@ -186,6 +204,10 @@ export async function fetchLessonPlanById(lessonPlanId: string) {
         credits: assignment.subjects.credits,
         is_theory: assignment.subjects.is_theory,
         is_practical: assignment.subjects.is_practical,
+        metadata: assignment.subjects.metadata || {},
+        pso: assignment.subjects.pso || [],
+        peo: assignment.subjects.peo || [],
+        lesson_plan_status: assignment.subjects.lesson_plan_status || 'draft',
         department: {
           id: assignment.subjects.department_id,
           name: "Computer Science and Engineering",
@@ -199,9 +221,9 @@ export async function fetchLessonPlanById(lessonPlanId: string) {
       },
       academic_year: assignment.academic_year || "2025",
       division: generalDetails.division || assignment.division || "Division 1",
-      credits: generalDetails.credits || 0,
-      lab_hours: generalDetails.lab_hours || 0,
-      lecture_hours: generalDetails.lecture_hours || 0,
+      credits: generalDetails.credits || assignment.subjects.credits || 0,
+      lab_hours: generalDetails.lab_hours || assignment.subjects.lab_hours || 0,
+      lecture_hours: generalDetails.lecture_hours || assignment.subjects.lecture_hours || 0,
       term_start_date: generalDetails.term_start_date || lessonPlanData?.term_start_date || "2024-12-10",
       term_end_date: generalDetails.term_end_date || lessonPlanData?.term_end_date || "2025-05-30",
       course_prerequisites: generalDetails.course_prerequisites || "",
@@ -222,6 +244,11 @@ export async function fetchLessonPlanById(lessonPlanId: string) {
       practical_planning_completed: lessonPlanData?.practical_planning_completed || false,
       cie_planning_completed: lessonPlanData?.cie_planning_completed || false,
       additional_info_completed: lessonPlanData?.additional_info_completed || false,
+      complete_general: existingForm?.complete_general || false,
+      complete_unit: existingForm?.complete_unit || false, 
+      complete_practical: existingForm?.complete_practical || false,
+      complete_cie: existingForm?.complete_cie || false,
+      complete_additional: existingForm?.complete_additional || false,
     }
 
     return {

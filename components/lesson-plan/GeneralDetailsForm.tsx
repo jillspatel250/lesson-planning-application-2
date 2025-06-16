@@ -55,6 +55,7 @@ export default function GeneralDetailsForm({ lessonPlan, setLessonPlan, openPdfV
   )
   const [courseOutcomes, setCourseOutcomes] = useState(lessonPlan?.courseOutcomes || [{ id: uuidv4(), text: "" }])
   const [remarks, setRemarks] = useState(lessonPlan?.remarks || "")
+  const [detailsSubmmitted, setDetailsSubmitted] = useState(lessonPlan?.general_details_completed || false)
 
   const [divisionError, setDivisionError] = useState("")
   const [lectureHoursError, setLectureHoursError] = useState("")
@@ -71,75 +72,75 @@ export default function GeneralDetailsForm({ lessonPlan, setLessonPlan, openPdfV
   const isPracticalOnly = lessonPlan?.subject?.is_practical === true && lessonPlan?.subject?.is_theory === false
 
   // FIXED DATABASE QUERY FUNCTION
-  const testDatabaseQuery = async () => {
-    try {
-      setDebugInfo("🔍 Testing database query...")
+  // const testDatabaseQuery = async () => {
+  //   try {
+  //     setDebugInfo("🔍 Testing database query...")
 
-      if (!lessonPlan?.subject?.code) {
-        setDebugInfo("❌ No subject code available")
-        return
-      }
+  //     if (!lessonPlan?.subject?.code) {
+  //       setDebugInfo("❌ No subject code available")
+  //       return
+  //     }
 
-      const subjectCode = lessonPlan.subject.code
-      setDebugInfo(`🔍 Querying for subject code: ${subjectCode}`)
+  //     const subjectCode = lessonPlan.subject.code
+  //     setDebugInfo(`🔍 Querying for subject code: ${subjectCode}`)
 
-      // SIMPLER QUERY - Just get the metadata
-      const { data, error } = await supabase.from("subjects").select("metadata").eq("code", subjectCode).single()
+  //     // SIMPLER QUERY - Just get the metadata
+  //     const { data, error } = await supabase.from("subjects").select("metadata").eq("code", subjectCode).single()
 
-      if (error) {
-        setDebugInfo(`❌ Database error: ${JSON.stringify(error)}`)
-        return
-      }
+  //     if (error) {
+  //       setDebugInfo(`❌ Database error: ${JSON.stringify(error)}`)
+  //       return
+  //     }
 
-      if (!data) {
-        setDebugInfo(`❌ No subject found with code: ${subjectCode}`)
-        return
-      }
+  //     if (!data) {
+  //       setDebugInfo(`❌ No subject found with code: ${subjectCode}`)
+  //       return
+  //     }
 
-      setDebugInfo(`✅ Found subject metadata: ${JSON.stringify(data.metadata, null, 2)}`)
+  //     setDebugInfo(`✅ Found subject metadata: ${JSON.stringify(data.metadata, null, 2)}`)
 
-      // Extract dates from metadata
-      let metadata = data.metadata
-      if (typeof metadata === "string") {
-        try {
-          metadata = JSON.parse(metadata)
-        } catch (e) {
-          setDebugInfo(`❌ Error parsing metadata: ${e.message}`)
-          return
-        }
-      }
+  //     // Extract dates from metadata
+  //     let metadata = data.metadata
+  //     if (typeof metadata === "string") {
+  //       try {
+  //         metadata = JSON.parse(metadata)
+  //       } catch (e) {
+  //         setDebugInfo(`❌ Error parsing metadata: ${e.message}`)
+  //         return
+  //       }
+  //     }
 
-      const startDate = metadata?.term_start_date
-      const endDate = metadata?.term_end_date
+  //     const startDate = metadata?.term_start_date
+  //     const endDate = metadata?.term_end_date
 
-      setDebugInfo(`📅 Extracted dates: start=${startDate}, end=${endDate}`)
+  //     setDebugInfo(`📅 Extracted dates: start=${startDate}, end=${endDate}`)
 
-      // If dates are found, set them
-      if (startDate) {
-        setFacultyTermDates((prev) => ({
-          ...prev,
-          termStartDate: startDate,
-        }))
-        setDebugInfo((prev) => prev + "\n✅ Start date set!")
-      }
+  //     // If dates are found, set them
+  //     if (startDate) {
+  //       setFacultyTermDates((prev) => ({
+  //         ...prev,
+  //         termStartDate: startDate,
+  //       }))
+  //       setDebugInfo((prev) => prev + "\n✅ Start date set!")
+  //     }
 
-      if (endDate) {
-        setFacultyTermDates((prev) => ({
-          ...prev,
-          termEndDate: endDate,
-        }))
-        setDebugInfo((prev) => prev + "\n✅ End date set!")
-      }
+  //     if (endDate) {
+  //       setFacultyTermDates((prev) => ({
+  //         ...prev,
+  //         termEndDate: endDate,
+  //       }))
+  //       setDebugInfo((prev) => prev + "\n✅ End date set!")
+  //     }
 
-      if (startDate || endDate) {
-        toast.success("Term dates loaded successfully!")
-      } else {
-        setDebugInfo((prev) => prev + "\n⚠️ No dates found in metadata")
-      }
-    } catch (error) {
-      setDebugInfo(`💥 Error: ${error.message}\n${error.stack}`)
-    }
-  }
+  //     if (startDate || endDate) {
+  //       toast.success("Term dates loaded successfully!")
+  //     } else {
+  //       setDebugInfo((prev) => prev + "\n⚠️ No dates found in metadata")
+  //     }
+  //   } catch (error) {
+  //     setDebugInfo(`💥 Error: ${error.message}\n${error.stack}`)
+  //   }
+  // }
 
   // FIXED ADD SAMPLE DATES FUNCTION
   const addSampleTermDates = async () => {

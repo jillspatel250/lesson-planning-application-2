@@ -22,6 +22,10 @@ interface Links {
 
 const dummyLinks: Links[] = [
   {
+    name: "SOP of Lesson Planning Document(LPD)",
+    url: "https://drive.google.com/file/d/1svag1XlHe8okdnbM6xPPPfDRFqLrsK6c/view?usp=drive_link",
+  },
+  {
     name: "LPD_Annexure I_Guidelines for learning materials",
     url: "https://drive.google.com/file/d/1-PYM0JUeljwhxf-xYq6jNh4bkeym6CUS/view?usp=drive_link",
   },
@@ -49,10 +53,6 @@ const dummyLinks: Links[] = [
     name: "LPD_Annexure VII_Tasks for fast learner, medium learner and slow learner",
     url: "https://drive.google.com/file/d/1VtEZ5ngwX8439DrciwHj-TM_YX4t03ri/view?usp=drive_link",
   },
-  {
-    name: "SOP of Lesson Planning Document(LPD)",
-    url: "https://drive.google.com/file/d/1svag1XlHe8okdnbM6xPPPfDRFqLrsK6c/view?usp=drive_link",
-  },
 ];
 
 function GuidelineModel({ isOpen, onClose }: GuidelineModalProps) {
@@ -64,33 +64,39 @@ function GuidelineModel({ isOpen, onClose }: GuidelineModalProps) {
 
   return (
     <div>
-      <Dialog open={isOpen} onOpenChange={onClose}>
-        <DialogContent className="w-[1000px]">
-          <DialogHeader>
-            <DialogTitle className="text-[#1A5CA1] font-manrope font-bold text-[23px] leading-[25px]">
-              Guidelines
-            </DialogTitle>
-            <DialogDescription className="pt-3">
-              <div className="text-[17px] leading-[24px]">
-                <ul className="list-disc pl-5">
-                  {link.map((item, index) => (
-                    <li key={index} className="mb-3 text-black">
-                      <a
-                        href={item.url}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="hover:underline"
-                      >
-                        {item.name}
-                      </a>
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            </DialogDescription>
-          </DialogHeader>
-        </DialogContent>
-      </Dialog>
+     <Dialog open={isOpen} onOpenChange={onClose}>
+  <DialogContent
+    className="!w-[43vw] !max-w-none px-8 py-6 overflow-y-auto"
+  >
+    <DialogHeader>
+      <DialogTitle className="text-[#1A5CA1] font-manrope font-bold text-[23px] leading-[25px]">
+        Guidelines
+      </DialogTitle>
+      <DialogDescription className="pt-3">
+        <div className="text-[17px] leading-[24px] overflow-x-auto">
+          <ul className="list-disc pl-5 min-w-full">
+            {link.map((item, index) => (
+              <li
+                key={index}
+                className="mb-3 text-black whitespace-nowrap"
+              >
+                <a
+                  href={item.url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="hover:underline"
+                >
+                  {item.name}
+                </a>
+              </li>
+            ))}
+          </ul>
+        </div>
+      </DialogDescription>
+    </DialogHeader>
+  </DialogContent>
+</Dialog>
+
     </div>
   );
 }

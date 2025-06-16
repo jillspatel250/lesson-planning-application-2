@@ -278,6 +278,13 @@ export async function saveGeneralDetailsForm(formData: any) {
       return { success: false, error: result.error.message };
     }
 
+    const { error: updateStatusError } = await supabase
+      .from("forms")
+      .update({ complete_general: true })
+      .eq("faculty_id", faculty_id)
+      .eq("subject_id", formData.subject_id)
+      .single(); 
+
     // Update lesson plan status to "In Progress" after saving general details
     //change this part
     const { error: statusUpdateError } = await supabase
@@ -285,7 +292,7 @@ export async function saveGeneralDetailsForm(formData: any) {
       .update({ lesson_plan_status: "in_progress" })
       .eq("id", formData.subject_id);
 
-    if (statusUpdateError) {
+    if (statusUpdateError || updateStatusError) {
       console.error("❌ Error updating subject status:", statusUpdateError);
     } else {
       console.log("✅ Subject lesson plan status updated to in_progress");
