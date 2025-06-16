@@ -72,7 +72,7 @@ function formatDateForInput(dateString: string): string {
   const [day, month, year] = dateString.split("-")
   if (!day || !month || !year) return ""
 
-  return `${year}-${month}-${day}`
+  return `${year}-${month.padStart(2, "0")}-${day.padStart(2, "0")}`
 }
 
 // Convert YYYY-MM-DD from input type="date" to DD-MM-YYYY
@@ -82,14 +82,14 @@ function formatDateFromInput(dateString: string): string {
   const [year, month, day] = dateString.split("-")
   if (!day || !month || !year) return ""
 
-  return `${day}-${month}-${year}`
+  return `${day.padStart(2, "0")}-${month.padStart(2, "0")}-${year}`
 }
 
 // Updated form schemas with date validation
 const addFacultySchema = z.object({
   email: z.string().email("Please enter a valid email address"),
   name: z.string().min(2, "Name must be at least 2 characters"),
-  departId: z.string(),
+  departId: z.string().min(1, "Department ID is required"),
   subjectId: z.string().optional(),
   academicYear: z.string().min(4, "Please enter a valid academic year"),
   division: z.enum(["Division 1", "Division 2", "Division 1 & Division 2"], {
@@ -101,7 +101,7 @@ const editFacultySchema = z.object({
   id: z.string().uuid(),
   email: z.string().email("Please enter a valid email address"),
   name: z.string().min(2, "Name must be at least 2 characters"),
-  departId: z.string(),
+  departId: z.string().min(1, "Department ID is required"),
   subjectIds: z.array(z.string()).min(1, "Please select at least one subject"),
   academicYear: z.string().min(4, "Please enter a valid academic year"),
   division: z.enum(["Division 1", "Division 2", "Division 1 & Division 2"], {
@@ -114,11 +114,8 @@ const addSubjectSchema = z
     code: z.string().min(3, "Code must be at least 3 characters"),
     name: z.string().min(3, "Name must be at least 3 characters"),
     semester: z.coerce.number().int().min(1).max(8),
-    lectureHours: z.coerce.number().int().min(0),
-    labHours: z.coerce.number().int().min(0),
     abbreviationName: z.string().min(2, "Abbreviation must be at least 2 characters"),
-    credits: z.coerce.number().int().min(1),
-    departmentId: z.string(),
+    departmentId: z.string().min(1, "Department ID is required"),
     isPractical: z.boolean(),
     isTheory: z.boolean(),
     termStartDate: z.string().optional(),
@@ -174,39 +171,51 @@ export default function HODDashboard() {
     { id: "2", label: "PEO2", value: "", type: "PEO" },
   ])
 
+  // FIXED: Ensure all default values are properly defined
+  const getDefaultFacultyValues = () => ({
+    email: "",
+    name: "",
+    departId: currentRole?.depart_id || "",
+    subjectId: "",
+    academicYear: new Date().getFullYear().toString(),
+    division: "Division 1 & Division 2" as const,
+  })
+
+  const getDefaultEditFacultyValues = () => ({
+    id: "",
+    email: "",
+    name: "",
+    departId: currentRole?.depart_id || "",
+    subjectIds: [] as string[],
+    academicYear: new Date().getFullYear().toString(),
+    division: "Division 1 & Division 2" as const,
+  })
+
+  const getDefaultSubjectValues = () => ({
+    code: "",
+    name: "",
+    semester: 1,
+    abbreviationName: "",
+    departmentId: currentRole?.depart_id || "",
+    isPractical: false,
+    isTheory: true,
+    termStartDate: "",
+    termEndDate: "",
+  })
+
   const facultyForm = useForm<z.infer<typeof addFacultySchema>>({
     resolver: zodResolver(addFacultySchema),
-    defaultValues: {
-      departId: currentRole?.depart_id || "",
-      academicYear: new Date().getFullYear().toString(),
-      division: "Division 1 & Division 2",
-    },
+    defaultValues: getDefaultFacultyValues(),
   })
 
   const editFacultyForm = useForm<z.infer<typeof editFacultySchema>>({
     resolver: zodResolver(editFacultySchema),
-    defaultValues: {
-      id: "",
-      departId: currentRole?.depart_id || "",
-      subjectIds: [],
-      academicYear: new Date().getFullYear().toString(),
-      division: "Division 1 & Division 2",
-    },
+    defaultValues: getDefaultEditFacultyValues(),
   })
 
   const subjectForm = useForm<z.infer<typeof addSubjectSchema>>({
     resolver: zodResolver(addSubjectSchema),
-    defaultValues: {
-      departmentId: currentRole?.depart_id || "",
-      semester: 1,
-      lectureHours: 0,
-      labHours: 0,
-      credits: 0,
-      isPractical: false,
-      isTheory: true,
-      termStartDate: "",
-      termEndDate: "",
-    },
+    defaultValues: getDefaultSubjectValues(),
   })
 
   const uniqueRoles = useMemo(() => {
@@ -312,7 +321,7 @@ export default function HODDashboard() {
 
     const formData = new FormData()
     Object.entries(values).forEach(([key, value]) => {
-      if (value !== undefined) {
+      if (value !== undefined && value !== null) {
         formData.append(key, value.toString())
       }
     })
@@ -322,16 +331,14 @@ export default function HODDashboard() {
 
       if (result.success) {
         const message = result.data?.isNewUser
-          ? `Faculty added successfully! ${result.data.tempPassword ? `Temporary password: ${result.data.tempPassword}` : ""}`
+          ? `Faculty added successfully! ${
+              result.data.tempPassword ? `Temporary password: ${result.data.tempPassword}` : ""
+            }`
           : "Faculty role assigned to existing user successfully!"
 
         toast.success(message)
         setFacultyDialogOpen(false)
-        facultyForm.reset({
-          departId: currentRole.depart_id,
-          academicYear: new Date().getFullYear().toString(),
-          division: "Division 1 & Division 2",
-        })
+        facultyForm.reset(getDefaultFacultyValues())
 
         // Refresh faculty data
         const facultyData = await fetchFaculty()
@@ -366,7 +373,7 @@ export default function HODDashboard() {
         value.forEach((subjectId, index) => {
           formData.append(`subjectIds[${index}]`, subjectId)
         })
-      } else if (value !== undefined) {
+      } else if (value !== undefined && value !== null) {
         formData.append(key, value.toString())
       }
     })
@@ -376,7 +383,7 @@ export default function HODDashboard() {
       if (result.success) {
         toast.success("Faculty updated successfully")
         setEditFacultyDialogOpen(false)
-        editFacultyForm.reset()
+        editFacultyForm.reset(getDefaultEditFacultyValues())
 
         // Refresh faculty data
         const facultyData = await fetchFaculty()
@@ -404,10 +411,10 @@ export default function HODDashboard() {
     const subjectIds = facultySubjects.map((f) => f.subjects?.id).filter(Boolean) as string[]
 
     editFacultyForm.reset({
-      id: facultyMember.id,
+      id: facultyMember.id || "",
       email: facultyMember.users?.email || "",
       name: facultyMember.users?.name || "",
-      departId: facultyMember.depart_id,
+      departId: facultyMember.depart_id || "",
       subjectIds: subjectIds,
       academicYear: facultyMember.academic_year || new Date().getFullYear().toString(),
       division:
@@ -500,31 +507,22 @@ export default function HODDashboard() {
 
     const formData = new FormData()
     Object.entries(values).forEach(([key, value]) => {
-      formData.append(key, value.toString())
+      if (value !== undefined && value !== null) {
+        formData.append(key, value.toString())
+      }
     })
 
     try {
       const result = await addSubject(formData)
       if (result.success) {
         toast.success("Subject added successfully...")
-        subjectForm.reset({
-          departmentId: currentRole.depart_id,
-          semester: 1,
-          lectureHours: 0,
-          labHours: 0,
-          credits: 0,
-          isPractical: false,
-          isTheory: true,
-          termStartDate: "",
-          termEndDate: "",
-        })
+        subjectForm.reset(getDefaultSubjectValues())
 
         const subjectData = await fetchSubjects()
         const departSubjects = subjectData.filter((subject) => subject.department_id === currentRole.depart_id)
         setSubjects(departSubjects)
 
-        // Show PSO/PEO button in dialog after successful subject addition
-        setShowPsoPeoInDialog(true)
+        setSubjectDialogOpen(false)
       } else {
         toast.error("Failed to add subject")
       }
@@ -569,12 +567,22 @@ export default function HODDashboard() {
     loadData()
   }, [currentRole?.depart_id])
 
-  // Update form defaults when currentRole changes
+  // FIXED: Update form defaults when currentRole changes
   useEffect(() => {
     if (currentRole?.depart_id) {
-      facultyForm.setValue("departId", currentRole.depart_id)
-      editFacultyForm.setValue("departId", currentRole.depart_id)
-      subjectForm.setValue("departmentId", currentRole.depart_id)
+      // Reset forms with new default values
+      facultyForm.reset({
+        ...getDefaultFacultyValues(),
+        departId: currentRole.depart_id,
+      })
+      editFacultyForm.reset({
+        ...getDefaultEditFacultyValues(),
+        departId: currentRole.depart_id,
+      })
+      subjectForm.reset({
+        ...getDefaultSubjectValues(),
+        departmentId: currentRole.depart_id,
+      })
     }
   }, [currentRole?.depart_id, facultyForm, editFacultyForm, subjectForm])
 
@@ -590,7 +598,7 @@ export default function HODDashboard() {
     )
   }
 
-  console.log(uniqueFaculty);
+  console.log(uniqueFaculty)
 
   return (
     <div className="pt-3 px-5">
@@ -599,9 +607,9 @@ export default function HODDashboard() {
           {currentRole.role_name} Dashboard
         </p>
         <div>
-          <Select onValueChange={handleRoleChange} value={currentRole.role_name}>
+          <Select onValueChange={handleRoleChange} value={currentRole.role_name || ""}>
             <SelectTrigger className="w-[180px]">
-              <SelectValue placeholder={currentRole.role_name} />
+              <SelectValue placeholder={currentRole.role_name || "Select Role"} />
             </SelectTrigger>
             <SelectContent>
               {uniqueRoles.map((role, idx) => (
@@ -686,6 +694,7 @@ export default function HODDashboard() {
                                     type="email"
                                     placeholder="email@charusat.ac.in"
                                     className="w-full"
+                                    value={field.value || ""}
                                   />
                                 </FormControl>
                                 <FormMessage />
@@ -701,7 +710,12 @@ export default function HODDashboard() {
                                 <FormItem>
                                   <FormLabel>Faculty Name</FormLabel>
                                   <FormControl>
-                                    <Input {...field} placeholder="Enter faculty name" className="w-[200px]" />
+                                    <Input
+                                      {...field}
+                                      placeholder="Enter faculty name"
+                                      className="w-[200px]"
+                                      value={field.value || ""}
+                                    />
                                   </FormControl>
                                   <FormMessage />
                                 </FormItem>
@@ -714,7 +728,7 @@ export default function HODDashboard() {
                               render={({ field }) => (
                                 <FormItem>
                                   <FormLabel>Subject (Optional)</FormLabel>
-                                  <Select onValueChange={field.onChange} value={field.value}>
+                                  <Select onValueChange={field.onChange} value={field.value || ""}>
                                     <FormControl className="w-[250px]">
                                       <SelectTrigger>
                                         <SelectValue placeholder="Select Subject" />
@@ -741,7 +755,7 @@ export default function HODDashboard() {
                               <FormItem>
                                 <FormLabel>Academic Year</FormLabel>
                                 <FormControl>
-                                  <Input {...field} />
+                                  <Input {...field} value={field.value || ""} />
                                 </FormControl>
                                 <FormMessage />
                               </FormItem>
@@ -754,7 +768,7 @@ export default function HODDashboard() {
                             render={({ field }) => (
                               <FormItem>
                                 <FormLabel>Division</FormLabel>
-                                <Select onValueChange={field.onChange} value={field.value}>
+                                <Select onValueChange={field.onChange} value={field.value || ""}>
                                   <FormControl>
                                     <SelectTrigger>
                                       <SelectValue placeholder="Select division" />
@@ -870,7 +884,7 @@ export default function HODDashboard() {
                                 <FormItem>
                                   <FormLabel>Subject Code</FormLabel>
                                   <FormControl>
-                                    <Input {...field} placeholder="CSE401" />
+                                    <Input {...field} placeholder="CSE401" value={field.value || ""} />
                                   </FormControl>
                                   <FormMessage />
                                 </FormItem>
@@ -884,7 +898,11 @@ export default function HODDashboard() {
                                 <FormItem>
                                   <FormLabel>Subject Name</FormLabel>
                                   <FormControl>
-                                    <Input {...field} placeholder="Data Communication and Networking" />
+                                    <Input
+                                      {...field}
+                                      placeholder="Data Communication and Networking"
+                                      value={field.value || ""}
+                                    />
                                   </FormControl>
                                   <FormMessage />
                                 </FormItem>
@@ -898,72 +916,26 @@ export default function HODDashboard() {
                                 <FormItem>
                                   <FormLabel>Abbreviation</FormLabel>
                                   <FormControl>
-                                    <Input {...field} placeholder="DCN" />
+                                    <Input {...field} placeholder="DCN" value={field.value || ""} />
                                   </FormControl>
                                   <FormMessage />
                                 </FormItem>
                               )}
                             />
 
-                            <div className="grid grid-cols-2 gap-4">
-                              <FormField
-                                control={subjectForm.control}
-                                name="semester"
-                                render={({ field }) => (
-                                  <FormItem>
-                                    <FormLabel>Semester</FormLabel>
-                                    <FormControl>
-                                      <Input type="number" {...field} min={1} max={8} />
-                                    </FormControl>
-                                    <FormMessage />
-                                  </FormItem>
-                                )}
-                              />
-
-                              <FormField
-                                control={subjectForm.control}
-                                name="credits"
-                                render={({ field }) => (
-                                  <FormItem>
-                                    <FormLabel>Credits</FormLabel>
-                                    <FormControl>
-                                      <Input type="number" {...field} min={1} />
-                                    </FormControl>
-                                    <FormMessage />
-                                  </FormItem>
-                                )}
-                              />
-                            </div>
-
-                            <div className="grid grid-cols-2 gap-4">
-                              <FormField
-                                control={subjectForm.control}
-                                name="lectureHours"
-                                render={({ field }) => (
-                                  <FormItem>
-                                    <FormLabel>Lecture Hours</FormLabel>
-                                    <FormControl>
-                                      <Input type="number" {...field} min={0} />
-                                    </FormControl>
-                                    <FormMessage />
-                                  </FormItem>
-                                )}
-                              />
-
-                              <FormField
-                                control={subjectForm.control}
-                                name="labHours"
-                                render={({ field }) => (
-                                  <FormItem>
-                                    <FormLabel>Lab Hours</FormLabel>
-                                    <FormControl>
-                                      <Input type="number" {...field} min={0} />
-                                    </FormControl>
-                                    <FormMessage />
-                                  </FormItem>
-                                )}
-                              />
-                            </div>
+                            <FormField
+                              control={subjectForm.control}
+                              name="semester"
+                              render={({ field }) => (
+                                <FormItem>
+                                  <FormLabel>Semester</FormLabel>
+                                  <FormControl>
+                                    <Input type="number" {...field} min={1} max={8} value={field.value || 1} />
+                                  </FormControl>
+                                  <FormMessage />
+                                </FormItem>
+                              )}
+                            />
 
                             <div className="grid grid-cols-2 gap-4">
                               <FormField
@@ -1018,7 +990,7 @@ export default function HODDashboard() {
                                     <FormControl>
                                       <Checkbox
                                         className="cursor-pointer"
-                                        checked={field.value}
+                                        checked={field.value || false}
                                         onCheckedChange={field.onChange}
                                       />
                                     </FormControl>
@@ -1037,7 +1009,7 @@ export default function HODDashboard() {
                                     <FormControl>
                                       <Checkbox
                                         className="cursor-pointer"
-                                        checked={field.value}
+                                        checked={field.value || false}
                                         onCheckedChange={field.onChange}
                                       />
                                     </FormControl>
@@ -1061,9 +1033,9 @@ export default function HODDashboard() {
                                 >
                                   Cancel
                                 </Button>
-                                  <Button type="submit" disabled={isAddingSubject}>
-                                    {isAddingSubject ? "Adding..." : "Add Subject"}
-                                  </Button>
+                                <Button type="submit" disabled={isAddingSubject}>
+                                  {isAddingSubject ? "Adding..." : "Add Subject"}
+                                </Button>
                               </div>
                             </DialogFooter>
                           </form>
@@ -1201,7 +1173,7 @@ export default function HODDashboard() {
                             <TableCell>{subject.code}</TableCell>
                             <TableCell>{subject.semester}</TableCell>
                             <TableCell>{subject.abbreviation_name}</TableCell>
-                            
+
                             <TableCell>
                               <Button
                                 className="bg-red-600 hover:bg-red-700"
@@ -1246,7 +1218,7 @@ export default function HODDashboard() {
                 render={({ field }) => (
                   <FormItem className="hidden">
                     <FormControl>
-                      <Input {...field} type="hidden" />
+                      <Input {...field} type="hidden" value={field.value || ""} />
                     </FormControl>
                   </FormItem>
                 )}
@@ -1260,7 +1232,12 @@ export default function HODDashboard() {
                     <FormItem>
                       <FormLabel>Faculty Name</FormLabel>
                       <FormControl>
-                        <Input {...field} placeholder="Enter faculty name" className="w-[200px]" />
+                        <Input
+                          {...field}
+                          placeholder="Enter faculty name"
+                          className="w-[200px]"
+                          value={field.value || ""}
+                        />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -1274,7 +1251,13 @@ export default function HODDashboard() {
                     <FormItem>
                       <FormLabel>Email Address</FormLabel>
                       <FormControl>
-                        <Input {...field} type="email" placeholder="Enter email address" className="w-[230px]" />
+                        <Input
+                          {...field}
+                          type="email"
+                          placeholder="Enter email address"
+                          className="w-[230px]"
+                          value={field.value || ""}
+                        />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -1293,7 +1276,7 @@ export default function HODDashboard() {
                         <div key={subject.id} className="flex items-center space-x-2">
                           <Checkbox
                             id={subject.id}
-                            checked={field.value?.includes(subject.id)}
+                            checked={(field.value || []).includes(subject.id)}
                             onCheckedChange={(checked) => {
                               const currentValues = field.value || []
                               if (checked) {
@@ -1324,7 +1307,7 @@ export default function HODDashboard() {
                   <FormItem>
                     <FormLabel>Academic Year</FormLabel>
                     <FormControl>
-                      <Input {...field} />
+                      <Input {...field} value={field.value || ""} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -1337,7 +1320,7 @@ export default function HODDashboard() {
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>Division</FormLabel>
-                    <Select onValueChange={field.onChange} value={field.value}>
+                    <Select onValueChange={field.onChange} value={field.value || ""}>
                       <FormControl>
                         <SelectTrigger>
                           <SelectValue placeholder="Select division" />

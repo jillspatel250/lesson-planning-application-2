@@ -16,6 +16,9 @@ export default function SignInPage() {
 
   async function handleSubmit(formData: FormData) {
     setLoad(true);
+    setTimeout(() => {
+      toast("An Email has been sent to update your password with instructions");
+    }, 0);
 
     const result = await resetPassword(formData);
 
@@ -26,7 +29,6 @@ export default function SignInPage() {
       return;
     }
 
-    toast('We will send you an email with instructions to reset your password');
     setMessage(result);
     setLoad(false);
   }

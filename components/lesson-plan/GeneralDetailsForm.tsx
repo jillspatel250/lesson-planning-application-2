@@ -678,7 +678,7 @@ export default function GeneralDetailsForm({ lessonPlan, setLessonPlan, openPdfV
         {/* FIXED: Only show lecture hours for non-practical-only subjects */}
         {!isPracticalOnly && (
           <div>
-            <Label htmlFor="lecture-hour">Lecture Hour/week</Label>
+            <Label htmlFor="lecture-hour">Lecture Hour</Label>
             <Input
               id="lecture-hour"
               type="number"
@@ -690,7 +690,7 @@ export default function GeneralDetailsForm({ lessonPlan, setLessonPlan, openPdfV
           </div>
         )}
         <div>
-          <Label htmlFor="lab-hour">Lab Hour/week</Label>
+          <Label htmlFor="lab-hour">Lab Hour</Label>
           <Input
             id="lab-hour"
             type="number"
@@ -707,7 +707,7 @@ export default function GeneralDetailsForm({ lessonPlan, setLessonPlan, openPdfV
             type="text"
             value={facultyTermDates.termStartDate || "Not set by HOD"}
             disabled
-            className={`mt-1 ${facultyTermDates.termStartDate ? "bg-green-50 border-green-200" : "bg-gray-50"}`}
+            className="mt-1"
           />
         </div>
         <div>
@@ -717,7 +717,7 @@ export default function GeneralDetailsForm({ lessonPlan, setLessonPlan, openPdfV
             type="text"
             value={facultyTermDates.termEndDate || "Not set by HOD"}
             disabled
-            className={`mt-1 ${facultyTermDates.termEndDate ? "bg-green-50 border-green-200" : "bg-gray-50"}`}
+            className="mt-1"
           />
         </div>
       </div>
