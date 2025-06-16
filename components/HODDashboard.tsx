@@ -1061,15 +1061,9 @@ export default function HODDashboard() {
                                 >
                                   Cancel
                                 </Button>
-                                {!showPsoPeoInDialog ? (
                                   <Button type="submit" disabled={isAddingSubject}>
                                     {isAddingSubject ? "Adding..." : "Add Subject"}
                                   </Button>
-                                ) : (
-                                  <Button type="button" onClick={() => setPsoPeoDialogOpen(true)}>
-                                    Add PSO/PEO
-                                  </Button>
-                                )}
                               </div>
                             </DialogFooter>
                           </form>
