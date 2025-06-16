@@ -3,6 +3,7 @@
 import { useDashboardContext } from "@/context/DashboardContext"
 import HODDashboard from "@/components/HODDashboard"
 import FacultyDashboard from "@/components/FacultyDashboard"
+import PrincipalDashboard from "@/components/PrincipalDashboard"
 
 export default function Dashboard() {
   const { roleData, currentRole } = useDashboardContext()
@@ -10,6 +11,11 @@ export default function Dashboard() {
   // Check if user has HOD role
   const hasHODRole = roleData?.some((role) => role.role_name === "HOD")
   const hasFacultyRole = roleData?.some((role) => role.role_name === "Faculty")
+  const hasPrincipalRole = roleData?.some((role) => role.role_name === "Principal")
+
+  if (hasPrincipalRole) {
+    return <PrincipalDashboard />
+  }
 
   // If user only has HOD role, show HOD dashboard
   if (hasHODRole && !hasFacultyRole) {

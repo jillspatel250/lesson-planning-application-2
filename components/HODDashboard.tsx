@@ -248,8 +248,6 @@ export default function HODDashboard() {
     return Array.from(facultyMap.values())
   }, [faculty])
 
-  console.log("Unique Faculty:", uniqueFaculty)
-
   const handleRoleChange = (roleName: string) => {
     const selectedRole = roleData.find((role) => role.role_name === roleName)
     if (selectedRole) {
@@ -597,8 +595,6 @@ export default function HODDashboard() {
       </div>
     )
   }
-
-  console.log(uniqueFaculty)
 
   return (
     <div className="pt-3 px-5">

@@ -46,9 +46,9 @@ export default function GeneralDetailsForm({ lessonPlan, setLessonPlan, openPdfV
 
   // Form state
   const [division, setDivision] = useState(lessonPlan?.division || "Div 1 & 2")
-  const [lectureHours, setLectureHours] = useState(lessonPlan?.subject?.lecture_hours || 0)
-  const [labHours, setLabHours] = useState(lessonPlan?.subject?.lab_hours || 0)
-  const [credits, setCredits] = useState(lessonPlan?.subject?.credits || 0)
+  const [lectureHours, setLectureHours] = useState(lessonPlan?.lecture_hours || 0)
+  const [labHours, setLabHours] = useState(lessonPlan?.lab_hours || 0)
+  const [credits, setCredits] = useState(lessonPlan?.credits || 0)
   const [coursePrerequisites, setCoursePrerequisites] = useState(lessonPlan?.course_prerequisites || "")
   const [coursePrerequisitesMaterials, setCoursePrerequisitesMaterials] = useState(
     lessonPlan?.course_prerequisites_materials || "",
@@ -548,6 +548,8 @@ export default function GeneralDetailsForm({ lessonPlan, setLessonPlan, openPdfV
 
     loadDraft()
   }, [userData?.id, lessonPlan?.subject?.id])
+
+  console.log(lessonPlan)
 
   return (
     <form onSubmit={handleSubmit} className="p-6 space-y-6">
