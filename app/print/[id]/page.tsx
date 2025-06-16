@@ -335,19 +335,19 @@ export default function PrintLessonPlanPage() {
                   Lecture Hours:
                 </td>
                 <td className="border border-black p-2 break-words overflow-hidden text-ellipsis max-w-0">
-                  {lessonPlan.subject.lecture_hours}
+                  {lessonPlan.lecture_hours}
                 </td>
                 <td className="border border-black p-2 font-bold break-words overflow-hidden text-ellipsis max-w-0">
                   Lab Hours:
                 </td>
                 <td className="border border-black p-2 break-words overflow-hidden text-ellipsis max-w-0">
-                  {lessonPlan.subject.lab_hours}
+                  {lessonPlan.lab_hours}
                 </td>
                 <td className="border border-black p-2 font-bold break-words overflow-hidden text-ellipsis max-w-0">
                   Credits:
                 </td>
                 <td className="border border-black p-2 break-words overflow-hidden text-ellipsis max-w-0">
-                  {lessonPlan.subject.credits}
+                  {lessonPlan.credits}
                 </td>
               </tr>
               <tr>
