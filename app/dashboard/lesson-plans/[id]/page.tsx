@@ -46,8 +46,8 @@ export default function EditLessonPlanPage() {
           credits: 4,
           department: {
             id: "d76a381e-0f08-464c-8eea-e2529db86a32",
-            name: "Computer Science and Engineering",
-            abbreviation_depart: "CSE",
+            name: "",
+            abbreviation_depart: "",
           },
         },
         faculty: {

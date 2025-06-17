@@ -1859,7 +1859,7 @@ export default function EditLessonPlanPage() {
                 general_details_completed: true,
               }))
 
-              toast.success(`✅ Copied lesson plan data from ${subject.users.name}! You can now edit and save.`)
+              toast.success(`Copied lesson plan data from ${subject.users.name}! You can now edit and save.`)
               setCopiedData(copyFormData)
               break // Exit loop after successful copy
             } else {
@@ -1973,7 +1973,7 @@ export default function EditLessonPlanPage() {
 
           {commonSubject.length >= 2 && (
             <Button
-              className="ml-auto bg-green-600 hover:bg-green-700 text-white"
+              className="ml-auto text-white"
               onClick={handleCopy}
               disabled={isCopying}
             >

@@ -62,7 +62,8 @@ export async function fetchLessonPlanById(lessonPlanId: string) {
           metadata,
           lesson_plan_status
         ),
-        users (*)
+        users (*),
+        departments(*)
       `)
       .eq("id", lessonPlanId)
       .single()
@@ -208,8 +209,8 @@ export async function fetchLessonPlanById(lessonPlanId: string) {
         lesson_plan_status: assignment.subjects.lesson_plan_status || 'draft',
         department: {
           id: assignment.subjects.department_id,
-          name: "Computer Science and Engineering",
-          abbreviation_depart: "CSE",
+          name: assignment.departments.name,
+          abbreviation_depart: assignment.departments.abbreviation_depart,
         },
       },
       faculty: {
