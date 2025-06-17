@@ -60,8 +60,6 @@ export async function fetchLessonPlanById(lessonPlanId: string) {
           is_practical,
           is_theory,
           metadata,
-          pso,
-          peo,
           lesson_plan_status
         ),
         users (*)
