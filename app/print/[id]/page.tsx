@@ -38,11 +38,11 @@ export default function PrintLessonPlanPage() {
   useEffect(() => {
     if (lessonPlan && !isLoading && !hasPrinted.current) {
       setTimeout(() => {
-        window.print()
-        hasPrinted.current = true
-      }, 200)
+        window.print();
+        hasPrinted.current = true;
+      }, 200);
     }
-  }, [lessonPlan, isLoading])
+  }, [lessonPlan, isLoading]);
 
   const handlePrint = () => {
     window.print();
@@ -427,7 +427,14 @@ export default function PrintLessonPlanPage() {
                       CO Mapping:
                     </td>
                     <td className="border border-black p-2" colSpan={3}>
-                      {unit.co_mapping.join(", ")}
+                      {unit.co_mapping
+                        .map((coId: any) => {
+                          const outcome = lessonPlan.courseOutcomes.find(
+                            (co: any) => co.id === coId
+                          );
+                          return outcome ? outcome.text : coId;
+                        })
+                        .join(", ")}
                     </td>
                   </tr>
                   <tr>
@@ -573,9 +580,14 @@ export default function PrintLessonPlanPage() {
                           CO Mapping:
                         </td>
                         <td className="border border-black p-2">
-                          {Array.isArray(practical.co_mapping)
-                            ? practical.co_mapping.join(", ")
-                            : practical.co_mapping}
+                          {practical.co_mapping
+                            .map((coId: any) => {
+                              const outcome = lessonPlan.courseOutcomes.find(
+                                (co: any) => co.id === coId
+                              );
+                              return outcome ? outcome.text : coId;
+                            })
+                            .join(", ")}
                         </td>
                       </tr>
                       {practical.pso_mapping.length > 0 && (
@@ -725,26 +737,26 @@ export default function PrintLessonPlanPage() {
               <table className="w-full border-collapse table-fixed">
                 <thead>
                   <tr>
-                    <th className="border border-black p-2 font-bold text-center break-words overflow-hidden text-ellipsis max-w-0">
-                      CIE No.
+                    <th className="border border-black p-2 font-bold text-center break-words overflow-hidden text-ellipsis max-w-0 w-[5%]">
+                      No.
                     </th>
-                    <th className="border border-black p-2 font-bold text-center break-words overflow-hidden text-ellipsis max-w-0">
+                    <th className="border border-black p-2 font-bold text-center break-words overflow-hidden text-ellipsis max-w-0 w-[38%]">
                       Units Covered
                     </th>
-                    <th className="border border-black p-2 font-bold text-center break-words overflow-hidden text-ellipsis max-w-0">
+                    <th className="border border-black p-2 font-bold text-center break-words overflow-hidden text-ellipsis max-w-0 w-[11%]">
                       Date
                     </th>
-                    <th className="border border-black p-2 font-bold text-center break-words overflow-hidden text-ellipsis max-w-0">
+                    <th className="border border-black p-2 font-bold text-center break-words overflow-hidden text-ellipsis max-w-0 w-[11%]">
                       Duration
                     </th>
-                    <th className="border border-black p-2 font-bold text-center break-words overflow-hidden text-ellipsis max-w-0">
+                    <th className="border border-black p-2 font-bold text-center break-words overflow-hidden text-ellipsis max-w-0 w-[6%]">
                       Marks
                     </th>
-                    <th className="border border-black p-2 font-bold text-center break-words overflow-hidden text-ellipsis max-w-0">
+                    <th className="border border-black p-2 font-bold text-center break-words overflow-hidden text-ellipsis max-w-0 w-[34%]">
                       Evaluation Method
                     </th>
-                    <th className="border border-black p-2 font-bold text-center break-words overflow-hidden text-ellipsis max-w-0">
-                      CO Mapping
+                    <th className="border border-black p-2 font-bold text-center break-words overflow-hidden text-ellipsis max-w-0 w-[10%]">
+                      COs
                     </th>
                   </tr>
                 </thead>
@@ -758,22 +770,70 @@ export default function PrintLessonPlanPage() {
                         {cie.units_covered}
                       </td>
                       <td className="border border-black p-2 text-center break-words overflow-hidden text-ellipsis max-w-0">
-                        {formatDate(cie.date)}
+                        {cie.date}
                       </td>
                       <td className="border border-black p-2 text-center break-words overflow-hidden text-ellipsis max-w-0">
-                        {cie.duration} mins
+                        {cie.duration >= 60
+                          ? `${
+                              cie.duration % 60 === 0
+                                ? (cie.duration / 60).toFixed(0)
+                                : (cie.duration / 60).toFixed(2)
+                            } hours`
+                          : `${cie.duration} mins`}
                       </td>
                       <td className="border border-black p-2 text-center break-words overflow-hidden text-ellipsis max-w-0">
                         {cie.marks}
                       </td>
                       <td className="border border-black p-2 break-words overflow-hidden text-ellipsis max-w-0">
-                        {cie.evaluation_method}
+                        {cie.evaluation_pedagogy}
                       </td>
                       <td className="border border-black p-2 break-words overflow-hidden text-ellipsis max-w-0">
-                        {cie.co_mapping}
+                        {cie.co_mapping
+                          .map((coId: any) => {
+                            const outcome = lessonPlan.courseOutcomes.find(
+                              (co: any) => co.id === coId
+                            );
+                            return outcome ? outcome.text : coId;
+                          })
+                          .join(", ")}
                       </td>
                     </tr>
                   ))}
+                  {/* Total Row */}
+                  <tr className="font-bold">
+                    <td className="border border-black p-2 text-center break-words overflow-hidden text-ellipsis max-w-0">
+                    </td>
+                    <td className="border border-black p-2 text-center break-words overflow-hidden text-ellipsis max-w-0">
+                      Total
+                    </td>
+                    <td className="border border-black p-2 text-center break-words overflow-hidden text-ellipsis max-w-0">
+                    </td>
+                    <td className="border border-black p-2 text-center break-words overflow-hidden text-ellipsis max-w-0">
+                      {(() => {
+                        const totalDuration = lessonPlan.cies.reduce(
+                          (sum: number, cie: any) => sum + cie.duration,
+                          0
+                        );
+                        return totalDuration >= 60
+                          ? `${
+                              totalDuration % 60 === 0
+                                ? (totalDuration / 60).toFixed(0)
+                                : (totalDuration / 60).toFixed(2)
+                            } hours`
+                          : `${totalDuration} mins`;
+                      })()}
+                    </td>
+                    <td className="border border-black p-2 text-center break-words overflow-hidden text-ellipsis max-w-0">
+                      {lessonPlan.cies.reduce(
+                        (sum: number, cie: any) => sum + cie.marks,
+                        0
+                      )}
+                    </td>
+                    <td className="border border-black p-2 text-center break-words overflow-hidden text-ellipsis max-w-0">
+                    </td>
+                    <td className="border border-black p-2 text-center break-words overflow-hidden text-ellipsis max-w-0">
+                    </td>
+                  </tr>
                 </tbody>
               </table>
             </div>

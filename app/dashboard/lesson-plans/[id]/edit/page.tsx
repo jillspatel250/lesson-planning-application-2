@@ -1,14 +1,13 @@
 //@ts-nocheck
-
 //@ts-ignore
 "use client";
 
-import { useState, useEffect, useMemo } from "react";
+import { useState, useEffect } from "react";
 import { useRouter, useParams } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { ArrowLeft, Copy, Save, X } from "lucide-react";
+import { ArrowLeft, Copy, X } from "lucide-react";
 import Link from "next/link";
 import GeneralDetailsForm from "@/components/lesson-plan/GeneralDetailsForm";
 import UnitPlanningForm from "@/components/lesson-plan/UnitPlanningForm";
@@ -93,24 +92,154 @@ export default function EditLessonPlanPage() {
   };
 
   const handleCopy = async () => {
-    for (const subject of commonSubject) {
-      if (subject.id !== lessonPlan.id) {
-        console.log(subject.subjects.id ,subject.users.id);
+    try {
+      for (const subject of commonSubject) {
+        if (subject.id !== lessonPlan.id) {
+          const { data: copyFormData, error: copyError } = await supabase
+            .from("forms")
+            .select("*, users(*), subjects(*, departments(*))")
+            .eq("faculty_id", subject.users.id)
+            .eq("subject_id", subject.subjects.id);
 
-        const { data: copyFormData, error: copyError } = await supabase
-          .from("forms")
-          .select("*, users(*), subjects(*, departments(*))")
-          .eq("faculty_id", subject.users.id)
-          .eq("subject_id", subject.subjects.id);
+          if (copyError) {
+            console.error("❌ Error fetching form data:", copyError);
+            toast.error("Failed to fetch form data for copying");
+            continue;
+          }
 
-        if (copyError) {
-          console.error("Error fetching form data:", copyError);
-          toast.error("Failed to fetch form data for copying");
+          if (copyFormData && copyFormData.length > 0) {
+            const sourceForm = copyFormData[0];
+            console.log("✅ Found form data:", sourceForm);
+
+            // Extract the form data
+            const formData = sourceForm.form;
+
+            if (formData) {
+              console.log("📝 Processing form data:", formData);
+
+              // Update the lesson plan state with copied data
+              setLessonPlan((prevLessonPlan) => ({
+                ...prevLessonPlan,
+                // Copy General Details
+                division:
+                  formData.generalDetails?.division || prevLessonPlan.division,
+                lecture_hours:
+                  formData.generalDetails?.lecture_hours ||
+                  prevLessonPlan.lecture_hours,
+                lab_hours:
+                  formData.generalDetails?.lab_hours ||
+                  prevLessonPlan.lab_hours,
+                credits:
+                  formData.generalDetails?.credits || prevLessonPlan.credits,
+                term_start_date:
+                  formData.generalDetails?.term_start_date ||
+                  prevLessonPlan.term_start_date,
+                term_end_date:
+                  formData.generalDetails?.term_end_date ||
+                  prevLessonPlan.term_end_date,
+                course_prerequisites:
+                  formData.generalDetails?.course_prerequisites ||
+                  prevLessonPlan.course_prerequisites,
+                course_prerequisites_materials:
+                  formData.generalDetails?.course_prerequisites_materials ||
+                  prevLessonPlan.course_prerequisites_materials,
+                courseOutcomes:
+                  formData.generalDetails?.courseOutcomes ||
+                  prevLessonPlan.courseOutcomes,
+                remarks:
+                  formData.generalDetails?.remarks || prevLessonPlan.remarks,
+
+                // Copy Unit Planning
+                unitPlanning:
+                  formData.unitPlanning || prevLessonPlan.unitPlanning,
+                units: formData.unitPlanning?.units || prevLessonPlan.units,
+
+                // Copy Practical Planning
+                practicalPlanning:
+                  formData.practicalPlanning ||
+                  prevLessonPlan.practicalPlanning,
+                practicals:
+                  formData.practicalPlanning?.practicals ||
+                  prevLessonPlan.practicals,
+
+                // Copy CIE Planning
+                ciePlanning: formData.ciePlanning || prevLessonPlan.ciePlanning,
+                cieDetails:
+                  formData.ciePlanning?.cieDetails || prevLessonPlan.cieDetails,
+
+                // Copy Additional Information
+                additionalInfo:
+                  formData.additionalInfo || prevLessonPlan.additionalInfo,
+                references:
+                  formData.additionalInfo?.references ||
+                  prevLessonPlan.references,
+                additionalNotes:
+                  formData.additionalInfo?.additionalNotes ||
+                  prevLessonPlan.additionalNotes,
+
+                // Update status
+                status: "in_progress",
+                general_details_completed: true,
+              }));
+
+              // Save the copied data to current faculty's form
+              const { data: newForm, error: insertError } = await supabase
+                .from("forms")
+                .upsert({
+                  faculty_id: userData.id,
+                  subject_id: lessonPlan.subject.id,
+                  form: formData,
+                })
+                .select();
+
+              if (insertError) {
+                console.error("❌ Error saving copied form:", insertError);
+                toast.error("Failed to save copied data");
+              } else {
+                console.log("✅ Copied data saved successfully");
+
+                // Update subject status
+                const { error: statusError } = await supabase
+                  .from("subjects")
+                  .update({ lesson_plan_status: "in_progress" })
+                  .eq("id", lessonPlan.subject.id);
+
+                if (statusError) {
+                  console.error(
+                    "❌ Error updating subject status:",
+                    statusError
+                  );
+                }
+
+                toast.success(
+                  `Successfully copied lesson plan data from ${subject.users.name}!`
+                );
+
+                // Refresh the page to ensure all forms show the copied data
+                setTimeout(() => {
+                  window.location.reload();
+                }, 1500);
+              }
+
+              setCopiedData(copyFormData);
+              break; // Exit loop after successful copy
+            } else {
+              console.log("⚠️ No form data found for this faculty");
+              toast.warning(
+                `No completed form data found for ${subject.users.name}`
+              );
+            }
+          } else {
+            console.log("⚠️ No form records found");
+            toast.warning(
+              `No lesson plan data found for ${subject.users.name}`
+            );
+          }
         }
-
-        console.log("Copying form data:", copyFormData);
-        setCopiedData(copyFormData);
       }
+    } catch (error) {
+      console.error("💥 Error in copy process:", error);
+      toast.error("Failed to copy lesson plan data");
     }
   };
 
@@ -224,19 +353,15 @@ export default function EditLessonPlanPage() {
           )}
 
           {commonSubject.length >= 2 && (
-            <Button className="ml-auto" onClick={handleCopy}>
+            <Button
+              className="ml-auto bg-blue-500 hover:bg-green-700 text-white"
+              onClick={handleCopy}
+            >
               <Copy className="mr-2" />
               Copy
             </Button>
           )}
         </div>
-
-        {/* <div className="flex items-center gap-2">
-          <Button onClick={handleSave} disabled={isSaving} className="bg-[#1A5CA1] hover:bg-[#154A80]">
-            <Save className="mr-2 h-4 w-4" />
-            {isSaving ? "Saving..." : "Save"}
-          </Button>
-        </div> */}
       </div>
 
       <Card className="mb-6">
