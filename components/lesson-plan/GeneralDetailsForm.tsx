@@ -1274,10 +1274,10 @@ export default function GeneralDetailsForm({ lessonPlan, setLessonPlan, openPdfV
       }
 
       // Validate lecture hours = credits * 15 (for non-practical-only subjects)
-      if (!isPracticalOnly && lectureHours !== credits * 15) {
-        setLectureHoursError(`Lecture hours must be equal to Credits × 15 (${credits * 15} hours)`)
-        hasErrors = true
-      }
+      // if (!isPracticalOnly && lectureHours !== credits * 15) {
+      //   setLectureHoursError(`Lecture hours must be equal to Credits × 15 (${credits * 15} hours)`)
+      //   hasErrors = true
+      // }
 
       if (labHours < 0) {
         setLabHoursError("Lab hours cannot be negative")
@@ -1539,7 +1539,7 @@ export default function GeneralDetailsForm({ lessonPlan, setLessonPlan, openPdfV
         {/* FIXED: Only show lecture hours for non-practical-only subjects */}
         {!isPracticalOnly && (
           <div>
-            <Label htmlFor="lecture-hour">Lecture Hour</Label>
+            <Label htmlFor="lecture-hour">Lecture Hour/week</Label>
             <Input
               id="lecture-hour"
               type="number"
@@ -1547,12 +1547,11 @@ export default function GeneralDetailsForm({ lessonPlan, setLessonPlan, openPdfV
               onChange={(e) => setLectureHours(Number(e.target.value))}
               className="mt-1"
             />
-            <p className="text-xs text-gray-500 mt-1">Lecture hours should be Credits × 15 = {credits * 15} hours</p>
             {lectureHoursError && <p className="text-red-500 text-xs mt-1">{lectureHoursError}</p>}
           </div>
         )}
         <div>
-          <Label htmlFor="lab-hour">Lab Hour</Label>
+          <Label htmlFor="lab-hour">Lab Hour/week</Label>
           <Input
             id="lab-hour"
             type="number"
