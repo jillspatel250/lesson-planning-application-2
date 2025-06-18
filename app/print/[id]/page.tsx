@@ -657,9 +657,14 @@ export default function PrintLessonPlanPage() {
                           className="border border-black p-2 text-sm break-words whitespace-normal"
                           colSpan={3}
                         >
-                          {Array.isArray(practical.associated_units)
-                            ? practical.associated_units.join(", ")
-                            : practical.associated_units}
+                         {Array.isArray(practical.associated_units)
+                        ? practical.associated_units
+                            .map((unitId) => {
+                              const unit = lessonPlan.units.find((u) => u.id === unitId)
+                              return unit ? unit.unit_name : unitId
+                            })
+                            .join(", ")
+                        : practical.associated_units}
                         </td>
                       </tr>
                       <tr>
@@ -958,3 +963,7 @@ export default function PrintLessonPlanPage() {
     </>
   );
 }
+
+
+
+
