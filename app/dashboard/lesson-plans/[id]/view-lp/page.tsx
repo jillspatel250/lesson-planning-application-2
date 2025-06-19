@@ -62,8 +62,6 @@ function ViewLessonPlanPage() {
     );
   }
 
-  console.log("Lesson Plan Data:", lessonPlan);
-
   const formatDate = (dateString: string) => {
     if (!dateString) return "N/A";
     const date = new Date(dateString);
@@ -520,14 +518,9 @@ function ViewLessonPlanPage() {
                                 className="border border-black p-2 text-sm break-words whitespace-normal"
                                 colSpan={5}
                               >
-                            {Array.isArray(practical.associated_units)
-                              ? practical.associated_units
-                                  .map((unitId) => {
-                                    const unit = lessonPlan.units.find((u) => u.id === unitId)
-                                    return unit ? unit.unit_name : unitId
-                                  })
-                                  .join(",  ")
-                              : practical.associated_units}
+                                {Array.isArray(practical.associated_units)
+                                  ? practical.associated_units.join(", ")
+                                  : practical.associated_units}
                               </td>
                             </tr>
                             <tr>
@@ -636,28 +629,53 @@ function ViewLessonPlanPage() {
                         <td className="border border-black p-2 text-center break-words overflow-hidden text-ellipsis max-w-0">
                           {index + 1}
                         </td>
-                        <td className="border border-black p-2 break-words overflow-hidden text-ellipsis max-w-0">
-  {Array.isArray(cie.units_covered)
-    ? cie.units_covered
+                        {/* <td className="border border-black p-2 break-words overflow-hidden text-ellipsis max-w-0">
+                          {cie.units_covered}
+                        </td> */}
+
+
+
+
+<td className="border border-black p-2 break-words overflow-hidden text-ellipsis max-w-0">
+  {(() => {
+    // Handle units_covered mapping
+    if (typeof cie.units_covered === "string") {
+      // Check if it's a comma-separated list of unit IDs
+      const unitIds = cie.units_covered.split(",").map((id) => id.trim())
+
+      // If it looks like UUIDs, try to map them to unit names
+      if (unitIds.some((id) => id.length > 20 && id.includes("-"))) {
+        const mappedUnits = unitIds.map((unitId) => {
+          const unit = lessonPlan.units?.find((u: any) => u.id === unitId)
+          if (unit) {
+            const unitIndex = lessonPlan.units.findIndex((u: any) => u.id === unitId)
+            return `Unit ${unitIndex + 1}: ${unit.unit_name}`
+          }
+          return unitId // Fallback to original ID if not found
+        })
+        return mappedUnits.join(", ")
+      }
+
+      // If it's already readable text, return as is
+      return cie.units_covered
+    }
+
+    // Handle array format
+    if (Array.isArray(cie.units_covered)) {
+      return cie.units_covered
         .map((unitId) => {
-          const unit = lessonPlan.units.find((u) => u.id === unitId)
-          return unit ? unit.unit_name : unitId
+          const unit = lessonPlan.units?.find((u: any) => u.id === unitId)
+          if (unit) {
+            const unitIndex = lessonPlan.units.findIndex((u: any) => u.id === unitId)
+            return `Unit ${unitIndex + 1}: ${unit.unit_name}`
+          }
+          return unitId
         })
         .join(", ")
-    : (() => {
-        // Handle single unit ID or comma-separated string of IDs
-        const unitIds =
-          typeof cie.units_covered === "string"
-            ? cie.units_covered.split(",").map((id) => id.trim())
-            : [cie.units_covered]
+    }
 
-        return unitIds
-          .map((unitId) => {
-            const unit = lessonPlan.units.find((u) => u.id === unitId)
-            return unit ? unit.unit_name : unitId
-          })
-          .join(", ")
-      })()}
+    return cie.units_covered || "N/A"
+  })()}
 </td>
                         <td className="border border-black p-2 text-center break-words overflow-hidden text-ellipsis max-w-0">
                           {cie.date}
@@ -1004,14 +1022,3 @@ function ViewLessonPlanPage() {
 }
 
 export default ViewLessonPlanPage;
-
-
-
-
-
-
-
-
-
-
-
