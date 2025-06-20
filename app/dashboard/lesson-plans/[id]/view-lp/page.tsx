@@ -100,7 +100,7 @@ function ViewLessonPlanPage() {
               <h3 className="text-xl font-bold">
                 Department of {lessonPlan.subject.department.name}
               </h3>
-              <h4 className="text-xl font-bold">Lesson Planning</h4>
+              <h4 className="text-xl font-bold">Lesson Planning Document (LPD)</h4>
             </div>
           </CardTitle>
         </CardHeader>
