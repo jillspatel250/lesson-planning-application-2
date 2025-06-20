@@ -857,7 +857,7 @@ function ViewLessonPlanPage() {
             )}
 
           {/* 6. STATUS */}
-          <h2 className="text-lg font-bold mb-2">6. STATUS</h2>
+          {/* <h2 className="text-lg font-bold mb-2">6. STATUS</h2>
           <div className="mb-6">
             <table className="w-full border-collapse">
               <tbody>
@@ -925,7 +925,7 @@ function ViewLessonPlanPage() {
                 )}
               </tbody>
             </table>
-          </div>
+          </div> */}
 
           {/* 7. COMPLETION STATUS */}
           <h2 className="text-lg font-bold mb-2">7. COMPLETION STATUS</h2>
