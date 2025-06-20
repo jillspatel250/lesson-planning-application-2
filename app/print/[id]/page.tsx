@@ -250,7 +250,7 @@ export default function PrintLessonPlanPage() {
           <h3 className="text-xl font-bold">
             Department of {lessonPlan.subject.department.name}
           </h3>
-          <h4 className="text-xl font-bold">Lesson Planning Document</h4>
+          <h4 className="text-xl font-bold">Lesson Planning Document (LPD)</h4>
         </div>
 
         {/* 1. GENERAL DETAILS */}
@@ -995,7 +995,8 @@ export default function PrintLessonPlanPage() {
 
         {/* DIGITAL SIGNATURE */}
         <p className="text-right text-sm mt-10">
-          {lessonPlan.faculty.name} | {formatDate(new Date().toISOString())}
+          {/* {lessonPlan.faculty.name} | {formatDate(new Date().toISOString())} */}
+          This LPD was downloaded on [{formatDate(new Date().toISOString())}] by [{lessonPlan.faculty.name}].
         </p>
       </div>
     </>
