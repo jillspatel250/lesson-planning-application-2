@@ -327,18 +327,18 @@ export default function PrintLessonPlanPage() {
                   Academic Year:
                 </td>
                 <td className="border border-black p-2 break-words overflow-hidden text-ellipsis max-w-0">
-                  {lessonPlan.academic_year}
+                {lessonPlan.academic_year} - {lessonPlan.academic_year%100+1}
                 </td>
               </tr>
               <tr>
                 <td className="border border-black p-2 font-bold break-words overflow-hidden text-ellipsis max-w-0">
-                  Lecture Hours:
+                  Lecture Hours / Week:
                 </td>
                 <td className="border border-black p-2 break-words overflow-hidden text-ellipsis max-w-0">
                   {lessonPlan.lecture_hours}
                 </td>
                 <td className="border border-black p-2 font-bold break-words overflow-hidden text-ellipsis max-w-0">
-                  Lab Hours:
+                Lab Hours / Week:
                 </td>
                 <td className="border border-black p-2 break-words overflow-hidden text-ellipsis max-w-0">
                   {lessonPlan.lab_hours}
@@ -399,7 +399,7 @@ export default function PrintLessonPlanPage() {
                       Faculty Name:
                     </td>
                     <td className="border border-black p-2 w-[30%]">
-                      {lessonPlan.units[index].faculty_name}
+                    {lessonPlan.faculty.name}
                     </td>
                   </tr>
                   <tr>
@@ -560,7 +560,7 @@ export default function PrintLessonPlanPage() {
                           Faculty Name:
                         </td>
                         <td className="border border-black p-2 w-[30%]">
-                          {practical.faculty_name}
+                        {lessonPlan.faculty.name}
                         </td>
                         <td className="border border-black p-2 font-bold bg-gray-50 w-[20%]">
                           Lab Hours:

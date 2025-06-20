@@ -262,3 +262,177 @@ export async function fetchLessonPlanById(lessonPlanId: string) {
     }
   }
 }
+
+
+
+// "use server"
+
+// import { createClient } from "@/utils/supabase/server"
+
+// export async function fetchLessonPlanById(lessonPlanId: string) {
+//   try {
+//     const supabase = await createClient()
+
+//     // Get the authenticated user
+//     const {
+//       data: { user },
+//       error: authError,
+//     } = await supabase.auth.getUser()
+
+//     if (authError || !user) {
+//       throw new Error("Authentication required")
+//     }
+
+//     console.log("🔍 Looking for lesson plan ID:", lessonPlanId)
+
+//     // 🚀 SIMPLE APPROACH: Find form data directly by ID
+//     const { data: formData, error: formError } = await supabase
+//       .from("forms")
+//       .select(`
+//         *,
+//         users!forms_faculty_id_fkey (
+//           id,
+//           name,
+//           email
+//         ),
+//         subjects!forms_subject_id_fkey (
+//           id,
+//           code,
+//           name,
+//           semester,
+//           lecture_hours,
+//           lab_hours,
+//           abbreviation_name,
+//           credits,
+//           department_id,
+//           is_practical,
+//           is_theory,
+//           metadata,
+//           departments (
+//             id,
+//             name,
+//             abbreviation_depart
+//           )
+//         )
+//       `)
+//       .eq("id", lessonPlanId)
+//       .single()
+
+//     if (formError || !formData) {
+//       console.error("❌ Form not found for ID:", lessonPlanId)
+
+//       // 🚀 FALLBACK: Show available form IDs
+//       const { data: availableForms } = await supabase.from("forms").select("id, subjects(name), users(name)").limit(10)
+
+//       if (availableForms) {
+//         console.log("📋 Available form IDs:")
+//         availableForms.forEach((form) => {
+//           console.log(`- ID: ${form.id} | Subject: ${form.subjects?.name} | Faculty: ${form.users?.name}`)
+//         })
+//       }
+
+//       throw new Error(`Form not found for lesson plan ID: ${lessonPlanId}`)
+//     }
+
+//     console.log("✅ Found form data for:", formData.subjects?.name)
+
+//     // Extract saved form data
+//     const savedFormData = formData.form || {}
+//     const generalDetails = savedFormData.generalDetails || {}
+//     const units = savedFormData.units || []
+//     const practicals = savedFormData.practicals || []
+//     const cies = savedFormData.cies || []
+//     const additionalInfo = savedFormData.additionalInfo || {}
+
+//     console.log("📊 Data summary:", {
+//       generalDetails: !!generalDetails,
+//       units: units.length,
+//       practicals: practicals.length,
+//       cies: cies.length,
+//       additionalInfo: !!additionalInfo,
+//     })
+
+//     // Process units to include faculty assignments
+//     const processedUnits = units.map((unit: any) => ({
+//       ...unit,
+//       assigned_faculty_id: unit.assigned_faculty_id || null,
+//       faculty_name: unit.faculty_name || null,
+//     }))
+
+//     // Process practicals to include faculty assignments
+//     const processedPracticals = practicals.map((practical: any) => ({
+//       ...practical,
+//       assigned_faculty_id: practical.assigned_faculty_id || null,
+//       faculty_name: practical.faculty_name || null,
+//     }))
+
+//     // 🚀 SIMPLE: Construct lesson plan object directly from form data
+//     const lessonPlan = {
+//       id: lessonPlanId,
+//       subject: {
+//         id: formData.subjects.id,
+//         code: formData.subjects.code,
+//         name: formData.subjects.name,
+//         semester: formData.subjects.semester,
+//         lecture_hours: formData.subjects.lecture_hours,
+//         lab_hours: formData.subjects.lab_hours,
+//         abbreviation_name: formData.subjects.abbreviation_name,
+//         credits: formData.subjects.credits,
+//         is_theory: formData.subjects.is_theory,
+//         is_practical: formData.subjects.is_practical,
+//         metadata: formData.subjects.metadata || {},
+//         pso: formData.subjects.pso || [],
+//         peo: formData.subjects.peo || [],
+//         lesson_plan_status: formData.subjects.lesson_plan_status || "draft",
+//         department: {
+//           id: formData.subjects.department_id,
+//           name: formData.subjects.departments?.name || "Unknown Department",
+//           abbreviation_depart: formData.subjects.departments?.abbreviation_depart || "DEPT",
+//         },
+//       },
+//       faculty: {
+//         id: formData.users.id,
+//         name: formData.users.name,
+//         email: formData.users.email,
+//       },
+//       academic_year: "2025",
+//       division: generalDetails.division || "Division 1",
+//       credits: generalDetails.credits || formData.subjects.credits || 0,
+//       lab_hours: generalDetails.lab_hours || formData.subjects.lab_hours || 0,
+//       lecture_hours: generalDetails.lecture_hours || formData.subjects.lecture_hours || 0,
+//       term_start_date: generalDetails.term_start_date || "2024-12-10",
+//       term_end_date: generalDetails.term_end_date || "2025-05-30",
+//       course_prerequisites: generalDetails.course_prerequisites || "",
+//       course_prerequisites_materials: generalDetails.course_prerequisites_materials || "",
+//       courseOutcomes: generalDetails.courseOutcomes || [],
+//       units: processedUnits,
+//       practicals: processedPracticals,
+//       cies: cies,
+//       additional_info: additionalInfo,
+//       unit_remarks: savedFormData.unit_remarks || "",
+//       practical_remarks: savedFormData.practical_remarks || "",
+//       cie_remarks: savedFormData.cie_remarks || "",
+//       status: "Draft",
+//       is_sharing: false,
+//       sharing_faculty: [],
+//       complete_general: formData.complete_general || false,
+//       complete_unit: formData.complete_unit || false,
+//       complete_practical: formData.complete_practical || false,
+//       complete_cie: formData.complete_cie || false,
+//       complete_additional: formData.complete_additional || false,
+//     }
+
+//     console.log("✅ Successfully constructed lesson plan for:", formData.subjects.name)
+
+//     return {
+//       success: true,
+//       data: lessonPlan,
+//     }
+//   } catch (error) {
+//     console.error("💥 Error fetching lesson plan:", error)
+//     return {
+//       success: false,
+//       error: error instanceof Error ? error.message : "Failed to fetch lesson plan",
+//     }
+//   }
+// }
