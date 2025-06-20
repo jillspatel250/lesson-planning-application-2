@@ -1,6 +1,5 @@
 
 
-
 //@ts-nocheck
 //@ts-ignore
 "use client"
@@ -452,9 +451,9 @@ export default function EditLessonPlanPage() {
             <>
               <Button className="ml-auto text-white" onClick={handleCopy} disabled={isCopying}>
                 <Copy className="mr-2" />
-                {isCopying ? "Finding Best Form..." : "Copy Best"}
+                {isCopying ? "Finding Best Form..." : "Fetch Data"}
               </Button>
-              <Button
+              {/* <Button
                 variant="outline"
                 onClick={() => {
                   console.log("🔍 DEBUG: Current lessonPlan:", lessonPlan)
@@ -463,7 +462,7 @@ export default function EditLessonPlanPage() {
                 }}
               >
                 Debug State
-              </Button>
+              </Button> */}
             </>
           )}
         </div>
